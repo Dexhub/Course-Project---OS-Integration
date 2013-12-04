@@ -13,6 +13,17 @@ extern uint64_t file_mmgr_memory_map[];
 extern char* read_disk(int);
 extern int append_disk(char* buf);
 
+int inflate(int fd)
+{
+  printf("\nInflating descriptor from %d to %d",fd,fd+INFLATE_CONSTANT);
+  return (fd+INFLATE_CONSTANT);
+}
+
+int deflate(int fd)
+{
+  printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
+  return (fd-INFLATE_CONSTANT);
+}
 int write_disk_superblock(DWORD offset, char* buf)
 {
     char* write_str = buf;
@@ -126,7 +137,7 @@ int get_free_inode(){
       printf("\n Error No free inode available");
       return -1;
 }
-/*
+
 int strcmp(char *a, char* b){
     int i=0, equals = 0; // equals = 0 is the tru value
     int len1 = strlen(a);
@@ -145,7 +156,7 @@ int strcmp(char *a, char* b){
     }
     return equals;
 }
-*/
+
 
 int get_free_block(){
 
@@ -218,11 +229,13 @@ int create_file(char *name){
 //  inode_list[inode].usage = TRUE;
 
   rsync();
-  return inode;
+  return inflate(inode);
+
 }
 
 int write_file(char *contents,int inode){
 
+ inode = deflate(inode);
    if(inode == -1)
       {
         printf("\nUnable to write to the file");
@@ -245,17 +258,6 @@ void create_write_file(char *name, char*contents){
     write_file(contents,create_file(name));
 }
 
-int inflate_descriptor(int fd)
-{
-  printf("\nInflating descriptor from %d to %d",fd,fd+INFLATE_CONSTANT);
-  return (fd+INFLATE_CONSTANT);
-}
-
-int deflate_descriptor(int fd)
-{
-  printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
-  return (fd-INFLATE_CONSTANT);
-}
 
 /*
 int create_file(char *name,char *contents){
@@ -330,7 +332,7 @@ int get_file_descriptor(char *name){
   return find_file(name);
 }
 
-char* read_descriptor(int inode){
+char* read_file(int inode){
   if(inode == -1)
     {
       printf(" = No file found");
@@ -353,10 +355,10 @@ char* read_descriptor(int inode){
 
 
 
-char* read_file(char *name){
+char* read_file_by_name(char *name){
 
   int fd = get_file_descriptor(name);
-  char *c = read_descriptor(fd);
+  char *c = read_file(fd);
   //printf("\n FD:%d",fd);
   if (c!= NULL)
     {
@@ -391,9 +393,9 @@ void ls()
 
 int get_sb()
 {
-  read_file("Name ");
-  read_file("Hello.txt ");
-  read_file("Hello.txt\0");
+  read_file_by_name("Name ");
+  read_file_by_name("Hello.txt ");
+  read_file_by_name("Hello.txt\0");
   create_file_static();
   ls();
   return 1;
