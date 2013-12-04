@@ -36,7 +36,6 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
     ctb_addr =(((ctb_addr | cmdheader->ctbau)<<32)|cmdheader->ctba);
     //kprintf("\n ctb_addr = %p", ctb_addr);
 
-    //  printf("\n Cmd Header Section Entered");
     HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(AHCI_KERN_BASE + ctb_addr);
     memset((uint64_t *)(AHCI_KERN_BASE + ctb_addr), 0, sizeof(HBA_CMD_TBL));
 
@@ -54,7 +53,7 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
 
     cmdfis->fis_type = FIS_TYPE_REG_H2D;
     cmdfis->c = 1;  // Command
-    cmdfis->command = ATA_CMD_WRITE_DMA_EXT; /// WRITE_DMA_EXT for Write ->HK
+    cmdfis->command = ATA_CMD_WRITE_DMA_EXT;
 
     cmdfis->lba0 = (BYTE)startl;
     cmdfis->lba1 = (BYTE)(startl>>8);
@@ -68,12 +67,10 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
     cmdfis->countl = 2;
     cmdfis->counth = 0;
 
-    //printf("[slot]{%d}", slot);
-    port->ci = 1 << slot;    // Issue command   >>HK No command after this instruction 1 -> 1 command.
-//    printf("\n[Port ci ][%d]", port->ci);
+    //kprintf("[slot]{%d}", slot);
+    port->ci = 1 << slot;    // Issue command
 
     // Wait for completion
-
     while (1)
     {
         // In some longer duration reads, it may be helpful to spin on the DPS bit 
@@ -84,7 +81,7 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
         }
         if (port->is & HBA_PxIS_TFES)   // Task file error
         {
-            printf("Write disk error\n");
+            kprintf("Write disk error\n");
             return 0;
         }
     }
@@ -92,74 +89,31 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
     // Check again
     if (port->is & HBA_PxIS_TFES)
     {
-        printf("Write disk error\n");
+        kprintf("Write disk error\n");
         return 0;
     }
     return 1;
 }
 
-/*
-int append_at(char* buf)
+int read(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWORD buf)  
 {
-    //Check is string more than 4096,
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,write_str,strlen(write_str));
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
-}
-*/
-int write_disk(DWORD offset, char* buf)
-{
-    //Check is string more than 4096,
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,write_str,strlen(write_str));
-    //memcpy(write_buffer,write_str,4096);
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
-}
-
-int write_disk2(DWORD offset, char* buf)
-{
-    //Check is string more than 4096,
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 6*(VIRT_PAGE_SIZE));
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,write_str,strlen(write_str));
-    //memcpy(write_buffer,write_str,4096);
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 6*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
-}
-
-
-int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWORD buf)
-{
-    //printf("\n Start Read");
 
     port->is = 0xffff;              // Clear pending interrupt bits
 
     int slot = find_cmdslot(port);
     if (slot == -1)
         return 0;
+
     uint64_t clb_addr = 0;
     clb_addr = (((clb_addr | port->clbu) << 32) | port->clb);
     HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(AHCI_KERN_BASE + clb_addr);
-    // printf("\n clb %x clbu %x", port->clb, port->clbu);
-
+    //kprintf("\n clb_addr = %p", clb_addr);
     cmdheader += slot;
 
     cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(DWORD);     // Command FIS size
-    cmdheader->w = 0;               // Read from device  -=> HK for write  w = 1
-    cmdheader->c = 1;               // Read from device
-//    cmdheader->p = 1;               // Read from device
+    cmdheader->w = 0;               // Read from device
+    cmdheader->c = 1;           
 
-    // 8K bytes (16 sectors) per PRDT
     cmdheader->prdtl = 1;    // PRDT entries count
 
     uint64_t ctb_addr=0;
@@ -172,21 +126,17 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
 
     // 8K bytes (16 sectors) per PRDT
     // Last entry
-
-    //  printf("\n Cmd Header Section Entered");
-
     cmdtbl->prdt_entry[0].dba = (DWORD)(buf & 0xFFFFFFFF);
     cmdtbl->prdt_entry[0].dbau = (DWORD)((buf >> 32) & 0xFFFFFFFF);
     cmdtbl->prdt_entry[0].dbc = 4096-1;   // 512 bytes per sector
     cmdtbl->prdt_entry[0].i = 0;
-
 
     // Setup command
     FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);
 
     cmdfis->fis_type = FIS_TYPE_REG_H2D;
     cmdfis->c = 1;  // Command
-    cmdfis->command = ATA_CMD_READ_DMA_EXT; /// WRITE_DMA_EXT for Write ->HK
+    cmdfis->command = ATA_CMD_READ_DMA_EXT;
 
     cmdfis->lba0 = (BYTE)startl;
     cmdfis->lba1 = (BYTE)(startl>>8);
@@ -200,9 +150,8 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
     cmdfis->countl = 1;
     cmdfis->counth = 0;
 
-    //printf("[slot]{%d}", slot);
-    port->ci = 1 << slot;    // Issue command   >>HK No command after this instruction 1 -> 1 command.
-//    printf("\n[Port ci ][%d]", port->ci);
+    //kprintf("[slot]{%d}", slot);
+    port->ci = 1 << slot;    // Issue command
 
     // Wait for completion
 
@@ -216,7 +165,7 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
         }
         if (port->is & HBA_PxIS_TFES)   // Task file error
         {
-            printf("Read disk error\n");
+            kprintf("Read disk error\n");
             return 0;
         }
     }
@@ -224,61 +173,12 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
     // Check again
     if (port->is & HBA_PxIS_TFES)
     {
-        printf("Read disk error\n");
+        kprintf("Read disk error\n");
         return 0;
     }
 
     return 1;
 }
-
-
-char* read_disk(DWORD offset)
-{
-    //Check is string more than 4096,
- //   printf("\n=====================================");
-    char *read_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 1 * (VIRT_PAGE_SIZE));
-//    printf("\nread_disk: Read address: %p",read_buffer);
-    //memset(read_buffer,0,VIRT_PAGE_SIZE);
-    uint64_t read_buffer_physical =((uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 1 * (VIRT_PAGE_SIZE) )- (uint64_t)0xFFFFFFFF80000000));
-    //printf("\nread_disk: Read address: %x",read_buffer_physical);
-
-    //printf("\n--> BEFORE Read : %s from location: %d", read_buffer, offset);
-    read_interface(&abar->ports[0], offset, 0, 1, read_buffer_physical);
-    //printf("\n--> Read : %s from location: %d", read_buffer, offset);
-    return read_buffer;
-}
-
-int strlen_disk(char* buf){
-    int count=0;
-    while(*buf++ != '\r')
-      count++;
-    return count;
-}
-
-
-int append_disk(char* buf)
-{
-    //Check is string more than 4096,
-    //forst perform a read, then add this line in the buffer, and then perform a write.
-    char *write_str = read_disk(0);
-    printf("\n Existing Data at 0:%s                      ",write_str);
-    printf("\n Size:%d              ",strlen_disk(write_str));
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    memcpy(write_buffer,write_str,strlen_disk(write_str));
-    write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE)+strlen(write_str));
-    //while(1);
-    printf("\n=>buff:%s",buf);
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,buf,strlen(buf));
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    write_interface(&abar->ports[0], 0, 0, 1, write_buffer_physical);
-    return 1;
-}
-//    //Check is string more than 4096,
-//    char *write_str = buf;
-//    memcpy(write_buffer,write_str,strlen(write_str));
-
 
 // To setup command fing a free command list slot
 int find_cmdslot(HBA_PORT *port)
@@ -368,8 +268,8 @@ void port_rebase(HBA_PORT *port, int portno){
 //    printf("\naddress is clb= %p\n",port->clb);
 
     port->clbu = 0;
-    port->fb =  (((uint64_t)pages_for_ahci_start + (uint64_t) ((32<<10)))& 0xffffffff);
-    port->fbu =  ((((uint64_t)pages_for_ahci_start + (uint64_t) ((32<<10)))>>32)& 0xffffffff);
+    port->fb   = (((uint64_t)AHCI_PHYS_BASE + (uint64_t) ((32<<10)))& 0xffffffff);
+    port->fbu  = ((((uint64_t)AHCI_PHYS_BASE + (uint64_t) ((32<<10)))>>32)& 0xffffffff);
 
     port->serr = 1;   //For each implemented port, clear the PxSERR register, by writing 1 to each mplemented location
     port->is   = 0;
@@ -394,16 +294,14 @@ void port_rebase(HBA_PORT *port, int portno){
         cmdheader[i].prdtl = 8; // 8 prdt entries per command table
         // 256 bytes per command table, 64+16+48+16*8
         // Command table offset: 40K + 8K*portno + cmdheader_index*256
-        cmdheader[i].ctba =  (((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))& 0xffffffff);
-        cmdheader[i].ctbau= ((((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))>>32)& 0xffffffff);
-       
- 		ctb_addr = 0;
+        cmdheader[i].ctba  = (((uint64_t)AHCI_PHYS_BASE + (uint64_t) (( 40 << 10 )) + (uint64_t)(( i << 8 ))) & 0xffffffff);
+        cmdheader[i].ctbau = ((((uint64_t)AHCI_PHYS_BASE + (uint64_t) (( 40 << 10)) + (uint64_t)(( i << 8 ))) >> 32)& 0xffffffff);
+
+        ctb_addr = 0;
         ctb_addr = ((( ctb_addr | cmdheader[i].ctbau ) << 32 ) | cmdheader[i].ctba );
         ctb_addr =  ctb_addr + AHCI_KERN_BASE;
-//        printf("vaddress ctba %d = %p\n", i, addres);
 
         memset((void*)ctb_addr, 0, 256);
-        //      memset((void*)cmdheader[i].ctba, 0, 256);
     }
 
     start_cmd(port);
@@ -455,58 +353,22 @@ void probe_port(HBA_MEM *abar_temp)
     }
 }
 
-uint64_t* ahci_alloc_pages(uint32_t no_of_vpages)
+void ahci_alloc_pages(uint32_t no_of_vpages)
 {
-    //Sohil: What is the ret addr
-    uint64_t *topVirtAddr = NULL;
+    uint64_t vaddr, paddr; 
+    int frame;
+    int i = 0;
 
-    topVirtAddr = (uint64_t*) sub_malloc(no_of_vpages +1 ,1);
+    vaddr = AHCI_VIRT_BASE;
+    paddr = AHCI_PHYS_BASE;
 
-    return topVirtAddr;
+    for (i = 0; i < no_of_vpages; ++i) {
+        map_virt_phys_addr(vaddr, paddr, RW_USER_FLAGS);
+        frame = paddr >> PAGE_2ALIGN;
+        mmap_set(frame);
+
+        paddr += PAGESIZE;
+        vaddr += PAGESIZE;     
+    }
 }
-
-void init_ahci()
-{
-
-    uint32_t paddr = 0xFEBF0000;
-
-//    pages_for_ahci_start_virtual = ahci_alloc_pages(30); // 30 pages allocate -> Write_pages are 5 onwards
-
-    void * virtAddr = (void *)sub_malloc(0,1);
-    // Performs a virtual to physical mapping such that the virtual address is of the form 0000 0000 xxxx xxxx
-    printf("\n==> Virtual address = %x",virtAddr);
-    vmmgr_map_page_after_paging(paddr, (uint64_t) virtAddr, 0);
-
-    //memset(virtAddr, 0, VIRT_PAGE_SIZE);
-
-    pages_for_ahci_start_virtual = (uint64_t*) sub_malloc(29 , 1);
-    pages_for_ahci_start =(uint64_t*)((uint64_t)pages_for_ahci_start_virtual - (uint64_t)0xFFFFFFFF80000000);  // physical page start -> 32 pages assign
-    //printf("\n==> Virtual for buffer:%x\n Physical for buffer: %x",pages_for_ahci_start_virtual, pages_for_ahci_start);
-    abar = (HBA_MEM *)virtAddr;
-   //printf("\n Capablity : %p  PI : %p VI : %p Interrupt Status : %p", abar->cap, abar->pi,abar->vs,abar->is);
-    probe_port(abar);
-    //printf("Back from probe_port");
-    //char *M = "Mike Ferdman Rocks\0";
-    /*char *C = ">>Chid Rocksi An operating system (OS) is a collection of software that manages computer hardware resources and provides common services for computer programs. The operating system is an essential component of the system software in a computer system. Application programs usually require an operating system to function.\
-Time-sharing operating systems schedule tasks for efficient use of the system and may also include accounting software for cost allocation of processor time, mass storage, printing, and other resources.\
-\
-For hardware functions such as input and output and memory allocation, the operating system acts as an intermediary between programs and the computer hardware,[1][2] although the application code is usually executed directly by the hardware and will frequently make a system call to an OS function or be interrupted by it. Operating systems can be found on almost any device that contains a computer—from cellular phones and video game consoles to supercomputers and web servers. \
-\
-Examples of popular modern operating systems include Android, BSD, iOS, Linux, OS X, QNX, Microsoft Windows,[3] Windows Phone, and IBM z/OS. All these, except Windows, Windows Phone and z/OS, share roots in UNIX.\0";*/
-    //char *O = "CSE 506 Rocks\0";
-    //char *I = "First -Initial \0";
-    //char *N = "Second - Next Value \0";
-
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //write_disk(0,I);
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //append_disk(N);
-    //write_disk(1,M);
-    //write_disk(3,O);
-
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //printf("\nREAD DATA: %s",read_disk(1));
-    //printf("\nREAD DATA: %s",read_disk(3));
-}
-
 
