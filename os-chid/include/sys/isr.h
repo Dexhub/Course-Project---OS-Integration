@@ -7,7 +7,7 @@
 
 void page_fault_handler(uint64_t, void*);
 void general_protection_fault_handler(uint64_t);
-void write(const char*);
+void write(const char*, int);
 int sys_getpid();
 void sys_exit();
 int fork(regs*);
@@ -23,4 +23,5 @@ int do_open(char*);
 int do_close(int);
 int changed(char*);
 void do_pwd();
+int do_create(char*);
 #endif

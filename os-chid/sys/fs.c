@@ -15,13 +15,13 @@ extern int append_disk(char* buf);
 
 int inflate(int fd)
 {
-  printf("\nInflating descriptor from %d to %d",fd,fd+INFLATE_CONSTANT);
+ // printf("\nInflating descriptor from %d to %d",fd,fd+INFLATE_CONSTANT);
   return (fd+INFLATE_CONSTANT);
 }
 
 int deflate(int fd)
 {
-  printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
+ // printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
   return (fd-INFLATE_CONSTANT);
 }
 int write_disk_superblock(DWORD offset, char* buf)
@@ -54,11 +54,9 @@ int write_disk_inode(DWORD offset, char* buf)
 {
     char *write_str = buf;
     char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    //printf("%p write buf\n",write_buffer);
     memcpy(write_buffer,write_str,sizeof(inode_list));
 
     uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
     return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
 void update_structures(){
@@ -92,9 +90,7 @@ void rsync(){
   memcpy ((char*)file_mmgr_memory_map , (char*)d,BITMAP_COUNT);
 
   struct inodes *d1 = (struct inodes*)read_disk(node_offset);
-  //printf("\nrsync checking_inode usage for usage:%d",inode_list[0].usage);
   memcpy ((char*)inode_list, (char*) d1,sizeof(inode_list));
-//  printf("\nrsync checking_inode usage for usage:%d",inode_list[0].usage);
   return;
 }
 
@@ -119,17 +115,9 @@ int get_free_inode(){
   int i;
   for(i=0; i<INODE_COUNT; i++)
   {
-   // printf("\n checking_inode usage for i :%d usage:%d",i,inode_list[i].usage);
     if(inode_list[i].usage != TRUE)
      {
-      //  printf("\nbefore checking_inode usage for i :%d usage:%d",i,inode_list[i].usage);
         inode_list[i].usage = TRUE;
-      //  printf("\nafter checking_inode usage for i :%d usage:%d",i,inode_list[i].usage);
-    //   rsync();
-      //  printf("\nafter after checking_inode usage for i :%d usage:%d",i,inode_list[i].usage);
-
-      //  printf("\n get_free_inode:%d",i);
-//        write_disk_inode(3,(char*)inode_list);
         return i;
 
       }
@@ -137,26 +125,6 @@ int get_free_inode(){
       printf("\n Error No free inode available");
       return -1;
 }
-/*
-int strcmp(char *a, char* b){
-    int i=0, equals = 0; // equals = 0 is the tru value
-    int len1 = strlen(a);
-    int len2 = strlen(b);
-    if( len1 != len2 )
-        return 1;
-    while(a[i] != NULL || a[i]!='\0'){
-        if(a[i] == b[i]){
-          i++;
-          continue;
-        }
-        else{
-          equals = 1;
-          break;
-        }
-    }
-    return equals;
-}
-*/
 
 int get_free_block(){
 
@@ -171,7 +139,7 @@ int get_free_block(){
 }
 
 int find_file(char *name){
-  printf("\n Searching for %s",name);
+  //printf("\n Searching for %s",name);
   int i;
   for(i=0; i<INODE_COUNT; i++)
   {
@@ -184,7 +152,7 @@ int find_file(char *name){
 }
 
 int find_directory(char *name){
-  printf("\n Searching for %s directory",name);
+  //printf("\n Searching for %s directory",name);
   int i;
   for(i=0; i<INODE_COUNT; i++)
   {
@@ -198,9 +166,9 @@ int find_directory(char *name){
 
 
 void flush_blocks(int block_number, char* contents){
-  printf("\n Before reading from block--> %s ",read_disk(block_number));
+  //printf("\n Before reading from block--> %s ",read_disk(block_number));
   write_disk(block_number,contents);
-  printf("\n After writing to block--> %s ",read_disk(block_number));
+  //printf("\n After writing to block--> %s ",read_disk(block_number));
 }
 
 int create_file(char *name){
@@ -222,7 +190,7 @@ int create_file(char *name){
       printf("\nUnable to create a file");
       return -1;
     }
-  printf("\n using inode:%d and block %d",inode,sector_block);
+ // printf("\n using inode:%d and block %d",inode,sector_block);
   strncpy(inode_list[inode].name,name,strlen(name));
   inode_list[inode].start_block = sector_block;
   inode_list[inode].type = TYPE_FILE;
@@ -234,7 +202,7 @@ int create_file(char *name){
 }
 
 int write_file(char *contents,int inode){
-
+ //printf("\nInside write_file");
  inode = deflate(inode);
    if(inode == -1)
       {
@@ -259,26 +227,6 @@ void create_write_file(char *name, char*contents){
 }
 
 
-/*
-int create_file(char *name,char *contents){
-
-  printf("\n Creating file:%s",name);
-  int size = strlen(contents);
-
-  int inode = get_free_inode();
-  int sector_block = get_free_block();
-
-  printf("\n using inode:%d and block %d",inode,sector_block);
-  strncpy(inode_list[inode].name,name,strlen(name));
-  inode_list[inode].size = size;
-  inode_list[inode].start_block = sector_block;
-//  inode_list[inode].usage = TRUE;
-
-  rsync();
-  flush_blocks(sector_block, contents);
-  return 1;
-}
-*/
 int make_directory(char *name){
   printf("\n Creating directory : %s",name);
    if(find_directory(name) != -1)
@@ -333,17 +281,18 @@ int get_file_descriptor(char *name){
 }
 
 char* read_file(int inode){
+  inode = deflate(inode);
   if(inode == -1)
     {
-      printf(" = No file found");
+//      printf(" = No file found");
       return NULL;
     }
   else
     {
-      printf(" = File found!");
+//      printf(" = File found!");
 //      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
       char *contents = read_disk(inode_list[inode].start_block);
-   //   printf("\n  File contents %s",contents);
+//      printf("\nFile contents :%s\n",contents);
     //  printf("\n6 ->%s ",read_disk(6));
     //  printf("\n7 ->%s ",read_disk(7));
     //  printf("\n8 ->%s ",read_disk(8));
@@ -393,10 +342,10 @@ void ls()
 
 int get_sb()
 {
-  read_file_by_name("Name ");
-  read_file_by_name("Hello.txt ");
-  read_file_by_name("Hello.txt\0");
-  create_file_static();
+ // read_file_by_name("Name ");
+//  read_file_by_name("Hello.txt ");
+//  read_file_by_name("Hello.txt\0");
+//  create_file_static();
   ls();
   return 1;
 }

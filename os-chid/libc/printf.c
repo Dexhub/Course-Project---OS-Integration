@@ -1,10 +1,11 @@
 //#include <syscalls.h>
 #include <ustdlib.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <defs.h>
 
-uint16_t write(const char* buf){
-  __asm__("movq $0x2, %rax;\n\tint $0x80;"); 
+uint16_t write(const char* buf, int fd){
+  __asm__("movq $0x2, %rax;\n\tint $0x80;");
   return 0;
 }
 
@@ -63,7 +64,7 @@ int printf(const char *fmt, ...) {
                }
        }
        va_end(arg_p);
-       write((const char*)buf);
+       write((const char*)buf, STDOUT);
        memset(buf, '\0', sizeof(buf));
 	return 0;
 }

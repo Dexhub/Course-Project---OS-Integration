@@ -7,6 +7,7 @@ uint64_t fork();
 int getpid();
 void sleep(uint64_t);
 int read(char *, int);
+uint16_t write(const char*, int);
 int wait();
 int execve(const char*);
 uint16_t ps();
@@ -25,4 +26,5 @@ void* malloc(int);
 int open(char*);
 void close(int);
 int cd(char*);
+int create(char*);
 #endif

@@ -48,31 +48,31 @@ int fault_handler(regs *r)
                                   break;
                           case 2: // Write
                                   str = (const char*)r->rdi;
-                                  write(str);
+                                  write(str,(int)r->rsi);
                                   break;
                           case 3: // Fork
-                                  temp_r.rax = r->rax; 
-                                  temp_r.rbx = r->rbx; 
-                                  temp_r.rcx = r->rcx; 
-                                  temp_r.rdx = r->rdx; 
-                                  temp_r.rsi = r->rsi; 
-                                  temp_r.rdi = r->rdi; 
-                                  temp_r.rbp = r->rbp; 
-                                  temp_r.r8 = r->r8; 
-                                  temp_r.r9 = r->r9; 
-                                  temp_r.r10 = r->r10; 
-                                  temp_r.r11 = r->r11; 
-                                  temp_r.r12 = r->r12; 
-                                  temp_r.r13 = r->r13; 
-                                  temp_r.r14 = r->r14; 
-                                  temp_r.r15 = r->r15; 
-                                  temp_r.rip = r->rip; 
-                                  temp_r.cs = r->cs; 
-                                  temp_r.rflags = r->rflags; 
-                                  temp_r.rsp = r->rsp; 
-                                  temp_r.ss = r->ss; 
-                                  temp_r.intNo = r->intNo; 
-                                  temp_r.errCode = r->errCode; 
+                                  temp_r.rax = r->rax;
+                                  temp_r.rbx = r->rbx;
+                                  temp_r.rcx = r->rcx;
+                                  temp_r.rdx = r->rdx;
+                                  temp_r.rsi = r->rsi;
+                                  temp_r.rdi = r->rdi;
+                                  temp_r.rbp = r->rbp;
+                                  temp_r.r8 = r->r8;
+                                  temp_r.r9 = r->r9;
+                                  temp_r.r10 = r->r10;
+                                  temp_r.r11 = r->r11;
+                                  temp_r.r12 = r->r12;
+                                  temp_r.r13 = r->r13;
+                                  temp_r.r14 = r->r14;
+                                  temp_r.r15 = r->r15;
+                                  temp_r.rip = r->rip;
+                                  temp_r.cs = r->cs;
+                                  temp_r.rflags = r->rflags;
+                                  temp_r.rsp = r->rsp;
+                                  temp_r.ss = r->ss;
+                                  temp_r.intNo = r->intNo;
+                                  temp_r.errCode = r->errCode;
                                   fork(ptemp_r);
                                   val = 0; // Returning 0 for parent
                                   //printf("rax = %d\n",temp_r.rax);//fork(temp_r);
@@ -98,7 +98,7 @@ int fault_handler(regs *r)
                                   break;
                           case 10: do_ls();
                                    break;
-                          case 11: val = (int)do_sbrk((int)r->rdi);  
+                          case 11: val = (int)do_sbrk((int)r->rdi);
                                    break;
                           case 12: val = 0;
                                    val = do_open((char*)r->rdi);
@@ -106,15 +106,18 @@ int fault_handler(regs *r)
                                    break;
                           case 13: do_close((int)r->rdi);
                                    break;
-                          case 20:// GetPID 
+                          case 20:// GetPID
                                   val = sys_getpid();
                                   break;
                           case 21: val = changed((char*)r->rdi);
                                   break;
-                          case 22: 
+                          case 22:
                                   do_pwd();
                                   break;
-                        } 
+                          case 23: val = -1;
+                                   val = do_create((char*)r->rdi);
+                                   break;
+                        }
                         break;
               default:  write_string(0x1F," Unknown Exception. System Halted!\n");
                         while(1);
@@ -126,7 +129,7 @@ int fault_handler(regs *r)
 }
 
 void idt_set_gate(unsigned char number, uint64_t base, uint16_t selector, unsigned char flags) {
-  
+
   /* Set Base Address */
   /* Set Base Address */
   idt[number].baseLow = base & 0xFFFF;
@@ -136,7 +139,7 @@ void idt_set_gate(unsigned char number, uint64_t base, uint16_t selector, unsign
   /* Set Selector */
   idt[number].selector = selector;
   idt[number].flags = flags;
-                    
+
   /* Set Reserved Areas to Zero */
   idt[number].reservedIst = 0;
   idt[number].reserved = 0;

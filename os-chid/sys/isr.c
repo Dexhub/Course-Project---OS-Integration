@@ -6,6 +6,7 @@
 #include <sys/idt.h>
 #include <stdlib.h>
 #include <sys/mmap.h>
+#include <fs.h>
 
 extern kthread* currentThread;
 extern kthread* ptable[100];
@@ -20,6 +21,9 @@ extern void print_ls();
 extern void print_ll();
 extern void print_pwd();
 extern int nextFreePid;
+extern char* read_file(int);
+extern int create_file(char*);
+extern int write_file(char*,int);
 extern int tarfs_open(char*);
 extern char files[][100];
 extern int file_used[];
@@ -34,7 +38,7 @@ void sys_exit(){
   kthread* k_thread;
   /*
   Important: While coming to this function, the kernel actually executes in the context
-  of the process. Thus we can easily get the PID of the process which currently issued the system call. 
+  of the process. Thus we can easily get the PID of the process which currently issued the system call.
   */
   pid = currentThread->pid;
   k_thread = ptable[pid];
@@ -69,16 +73,16 @@ void page_fault_handler(uint64_t err_code, void* err_ins){
               remove_alllist_kthread(&allThreadList, currentThread);
               sys_exit();
               }
-              return;   
-          }               
+              return;
+          }
           crawl = crawl->vm_next;
-        } 
+        }
     }
   // printf("PFFFFPP %p \npte = %p \nCOW = %p \ncr3 = %x\n",*pte, pte, PTE_COW,get_cr3_register());
     if(*pte & PTE_COW){
         char buf[4096];
 //        printf("wow COW\n");
-        phys = (uint64_t)mmgr_alloc_block();        
+        phys = (uint64_t)mmgr_alloc_block();
 //        printf("mapping phys %x to virt %x he he\n",phys,faulting_address);
         fault_page = PAGE_PHYSICAL_ADDRESS(&faulting_address);
 //        printf("fault_page = %p he he",fault_page);
@@ -128,8 +132,15 @@ void general_protection_fault_handler(uint64_t err_code){
   PANIC(__FUNCTION__,__LINE__,"General Protection Fault! ");
 }
 
-void write(const char* str){
-  printf("%s",str);
+void write(const char* str, int fd){
+  if(fd == STDOUT)
+    printf("%s",str);
+  else
+  {
+    write_file((char*)str,fd);
+    read_file(fd);
+    return;
+  }
 }
 
 int sys_getpid(){
@@ -139,34 +150,34 @@ int sys_getpid(){
 
 void PushU(kthread* k_thread, uint64_t value){
   k_thread->krsp -= 0x8;
-  *((uint64_t *) k_thread->krsp) = value; 
+  *((uint64_t *) k_thread->krsp) = value;
 }
 
 void fork_int(kthread* k_thread, regs* r){
   uint64_t pid = k_thread->pid;
-  PushU(k_thread, (uint64_t)0x23); 
-  PushU(k_thread, r->rsp); 
-  PushU(k_thread, r->rflags); 
-  PushU(k_thread, r->cs); 
-  PushU(k_thread, r->rip); 
-  PushU(k_thread, r->intNo); 
-  PushU(k_thread, r->errCode); 
-  PushU(k_thread, pid); // Pushing rax which is the value which fork should return 
-  PushU(k_thread, r->rbx); 
-  PushU(k_thread, r->rcx); 
-  PushU(k_thread, r->rdx); 
-  PushU(k_thread, r->rbp); 
-  PushU(k_thread, r->rdi); 
-  PushU(k_thread, r->rsi); 
-  PushU(k_thread, r->r8); 
-  PushU(k_thread, r->r9); 
-  PushU(k_thread, r->r10); 
-  PushU(k_thread, r->r11); 
-  PushU(k_thread, r->r12); 
-  PushU(k_thread, r->r13); 
-  PushU(k_thread, r->r14); 
-  PushU(k_thread, r->r15); 
-  
+  PushU(k_thread, (uint64_t)0x23);
+  PushU(k_thread, r->rsp);
+  PushU(k_thread, r->rflags);
+  PushU(k_thread, r->cs);
+  PushU(k_thread, r->rip);
+  PushU(k_thread, r->intNo);
+  PushU(k_thread, r->errCode);
+  PushU(k_thread, pid); // Pushing rax which is the value which fork should return
+  PushU(k_thread, r->rbx);
+  PushU(k_thread, r->rcx);
+  PushU(k_thread, r->rdx);
+  PushU(k_thread, r->rbp);
+  PushU(k_thread, r->rdi);
+  PushU(k_thread, r->rsi);
+  PushU(k_thread, r->r8);
+  PushU(k_thread, r->r9);
+  PushU(k_thread, r->r10);
+  PushU(k_thread, r->r11);
+  PushU(k_thread, r->r12);
+  PushU(k_thread, r->r13);
+  PushU(k_thread, r->r14);
+  PushU(k_thread, r->r15);
+
 }
 
 int fork(regs *r){
@@ -175,7 +186,7 @@ int fork(regs *r){
   k_thread->pid = alloc_pid();
   ptable[k_thread->pid] = k_thread;
   k_thread->kstack = (void*)sub_malloc(1,1);
-  k_thread->krsp = (((uint64_t) k_thread->kstack) + 2*VIRT_PAGE_SIZE -0x8); 
+  k_thread->krsp = (((uint64_t) k_thread->kstack) + 2*VIRT_PAGE_SIZE -0x8);
   k_thread->kstack = (void*)(((uint64_t) k_thread->kstack) + 2*VIRT_PAGE_SIZE - 0x8);
   k_thread->parent = currentThread;
   fork_int(k_thread, r);
@@ -190,7 +201,7 @@ int fork(regs *r){
   alllist_kthread(k_thread);
   runnable_kthread(k_thread);
 //  stackPage = (void*)UserStack;
-  return 0;  
+  return 0;
 }
 
 void sleep(uint64_t time){
@@ -220,6 +231,12 @@ signed int doread(char* buf,int fd){
   }
   else{
   // File code
+  if(fd >= 100)
+  {
+    char *src = read_file(fd);
+    memcpy(buf, src, 100);
+    return 0;
+  }
   if(file_used[fd] == 1){
     void *src = tarfs_read(files[fd]);
     memcpy(buf, (char*)src, 100);
@@ -233,7 +250,7 @@ signed int doread(char* buf,int fd){
 }
 
 void temp(){
-  return; 
+  return;
 }
 void wait(){
   __asm__ __volatile__("sti");
@@ -328,4 +345,11 @@ int changed(char* name){
 void do_pwd(){
   print_pwd();
   return;
+}
+
+int do_create(char* name){
+  int fd = create_file(name);
+  //write_file("This is file created using file descriptor",fd);
+  //read_file(fd);
+  return fd;
 }
