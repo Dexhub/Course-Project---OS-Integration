@@ -1,0 +1,35 @@
+>>
+IDEA: flush_blocks alone allocate a different physical address and implement a watch point
+>>
+open, read, close, opendir, readdir, closedir
+stdin, stdout, stderr 
+
+read() and write()
+execvpe,
+scanf to be done
+
+seek write mmap
+
+
+> Fix the write in the blocks from higher to lower necessary for LS
+> Do LS - fine now
+> Complete READ
+> Write directory
+> read Directory
+> create, delete file
+
+<> Clean shashank's code for AHCI compare with wiki
+<> rsync finish
+
+
+> Mount points for VFS
+> Prepare file descriptor object
+> Perform multiple blockfiles
+> Seek call
+> mmap
+
+>> DONE; create file -> returns a file descriptor
+>> DONE; write file -> 
+>> DONE; ls is done
+>> seek, I'll try
+>> close 
