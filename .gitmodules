@@ -1,0 +1,3 @@
+[submodule "os-hk2"]
+	path = os-hk2
+	url = git@bitbucket.org:himanshu1410/os-hk.git
