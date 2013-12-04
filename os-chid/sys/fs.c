@@ -126,7 +126,7 @@ int get_free_inode(){
       printf("\n Error No free inode available");
       return -1;
 }
-
+/*
 int strcmp(char *a, char* b){
     int i=0, equals = 0; // equals = 0 is the tru value
     int len1 = strlen(a);
@@ -145,7 +145,7 @@ int strcmp(char *a, char* b){
     }
     return equals;
 }
-
+*/
 
 int get_free_block(){
 
@@ -251,7 +251,7 @@ int inflate_descriptor(int fd)
   return (fd+INFLATE_CONSTANT);
 }
 
-int deflate_descriptor()
+int deflate_descriptor(int fd)
 {
   printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
   return (fd-INFLATE_CONSTANT);

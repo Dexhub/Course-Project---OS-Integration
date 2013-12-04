@@ -75,7 +75,7 @@ void start(uint16_t arg)
 //        asm volatile("int $0x80");
 	//readelf(&a1, &b1, &ca, &cb);
 //        printf("code buf = %s, data buf = %s, code length = %d, data_length = %d",a1,b1,ca,cb);
-        // kernel starts here 
+        // kernel starts here
         //switch_to_user();
         tarfs_dir();
       //  do_exec("bin/shell");
@@ -84,7 +84,7 @@ void start(uint16_t arg)
 //        char* tmp = "chid";
 //        while(i <= 30)
 //            printf("hello %d name %s %d\n",i++,tmp,i);
-        while(TRUE)     
+        while(TRUE)
 	  Yield();
        // while(1);
 }
