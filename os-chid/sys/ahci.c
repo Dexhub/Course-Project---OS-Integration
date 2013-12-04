@@ -120,7 +120,7 @@ int write_disk(DWORD offset, char* buf)
     //printf("\n Writing : %s at location: %d", write_buffer,offset);
     return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
-
+/*
 int write_disk2(DWORD offset, char* buf)
 {
     //Check is string more than 4096,
@@ -133,7 +133,7 @@ int write_disk2(DWORD offset, char* buf)
     //printf("\n Writing : %s at location: %d", write_buffer,offset);
     return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
-
+*/
 
 int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWORD buf)
 {
@@ -439,7 +439,7 @@ void probe_port(HBA_MEM *abar_temp)
             int dt = check_type((HBA_PORT *)&abar_temp->ports[i]);
             if (dt == AHCI_DEV_SATA)
             {
-                printf("\nSATA drive found at port %d\n", i);
+               // printf("\nSATA drive found at port %d\n", i);
                 abar = abar_temp;
                 port_rebase(abar_temp->ports, i);
                 return;

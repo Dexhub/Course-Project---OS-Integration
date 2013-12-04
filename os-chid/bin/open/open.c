@@ -4,7 +4,7 @@
 int main(){
   char buf[1000];
   int fd1;
-  fd1 = create("haaa.txt\0");
+  fd1 = create("haaa3.txt\0");
       printf("fd1 = %d\n",fd1);
   //int fd = open("bin/world");
   if( fd1 == 0 )
@@ -13,12 +13,12 @@ int main(){
       // Read from the file specified by the FD.
       read(buf,fd1);
 //      printf("fd = %d\n",fd1);
-//      printf("Buffer = %s\n",buf);
       write("===HHHHHHHHHHHHHHH\0",fd1);
 
 //      printf("fd = %d\n",fd1);
 //      printf("Buffer = %s\n",buf);
       read(buf,fd1);
+      printf("Buffer = %s\n",buf);
       // Close the file.
       //close(fd);
   }

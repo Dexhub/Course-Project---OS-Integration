@@ -174,7 +174,7 @@ void flush_blocks(int block_number, char* contents){
 int create_file(char *name){
 
   // Check if the file already exists, in such case, print the message and ask the user to use the write_function to write to the file
-
+  printf("\n Creating file :%s",name);
    if(find_file(name) != -1)
     {
         printf("\nFile with this name exists");
@@ -213,7 +213,7 @@ int write_file(char *contents,int inode){
       {
         int size = strlen(contents);
 
-        //printf("\n using inode:%d and block %d",inode,sector_block);
+        printf("\n Writing file contents using inode:%d",inode);
         inode_list[inode].size = size;
 
         rsync();
@@ -284,13 +284,13 @@ char* read_file(int inode){
   inode = deflate(inode);
   if(inode == -1)
     {
-//      printf(" = No file found");
+      printf(" = No file found");
       return NULL;
     }
   else
     {
-//      printf(" = File found!");
-//      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
+      printf(" = File found!");
+      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
       char *contents = read_disk(inode_list[inode].start_block);
 //      printf("\nFile contents :%s\n",contents);
     //  printf("\n6 ->%s ",read_disk(6));
@@ -322,7 +322,7 @@ char* read_file_by_name(char *name){
 
 void ls()
 {
-  printf("\n-------Disk Contents-----");
+  //printf("\n-------Disk Contents-----");
   update_structures();
   int inode;
   for(inode=0; inode<INODE_COUNT-95; inode++)
@@ -346,7 +346,7 @@ int get_sb()
 //  read_file_by_name("Hello.txt ");
 //  read_file_by_name("Hello.txt\0");
 //  create_file_static();
-  ls();
+//  ls();
   return 1;
 }
 

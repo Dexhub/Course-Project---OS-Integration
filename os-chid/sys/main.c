@@ -47,7 +47,7 @@ void start(uint16_t arg)
       update_structures();
       get_sb();
       tarfs_dir();
-      do_exec("bin/open");
+      do_exec("bin/shell");
       while(TRUE)
 	      Yield();
        // while(1);
