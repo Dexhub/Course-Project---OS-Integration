@@ -21,9 +21,10 @@ extern void print_ls();
 extern void print_ll();
 extern void print_pwd();
 extern int nextFreePid;
-extern char* read_file(int);
+extern char* read_file(int inode,int count,char* buf);
 extern int create_file(char*);
 extern int write_file(char*,int);
+extern void seek(int,int);
 extern int tarfs_open(char*);
 extern char files[][100];
 extern int file_used[];
@@ -138,7 +139,6 @@ void write(const char* str, int fd){
   else
   {
     write_file((char*)str,fd);
-    read_file(fd);
     return;
   }
 }
@@ -208,7 +208,7 @@ void sleep(uint64_t time){
   currentThread->sleeping = time;
 }
 
-signed int doread(char* buf,int fd){
+signed int doread(char* buf,int fd, int cnt){
   if(fd == STDIN){
   __asm__ __volatile__("sti");
   //printf("querying for read_busy by %d val = %d\n",currentThread->pid, reading);
@@ -233,13 +233,14 @@ signed int doread(char* buf,int fd){
   // File code
   if(fd >= 100)
   {
-    char *src = read_file(fd);
-    memcpy(buf, src, 100);
+    //char *src = read_file(fd);
+    read_file(fd,cnt,buf);
+    //memcpy(buf, src, cnt);
     return 0;
   }
   if(file_used[fd] == 1){
     void *src = tarfs_read(files[fd]);
-    memcpy(buf, (char*)src, 100);
+    memcpy(buf, (char*)src, cnt);
     return 0;
   }
   else{
@@ -332,7 +333,11 @@ int do_open(char* name){
 }
 
 void do_close(int fd){
-  file_used[fd]=0;
+  // This is because, the table does not store fd's for files in file system
+  // FD's for file system will be greater than 100. So if we let this do
+  // result is obvious
+  if(fd < 50)
+    file_used[fd]=0;
   return;
 }
 
@@ -352,4 +357,9 @@ int do_create(char* name){
   //write_file("This is file created using file descriptor",fd);
   //read_file(fd);
   return fd;
+}
+
+int do_seek(int fd, int pos){
+  seek(fd,pos);
+  return 0;
 }

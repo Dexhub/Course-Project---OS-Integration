@@ -4,23 +4,31 @@
 int main(){
   char buf[1000];
   int fd1;
+  int seek_inc = 3;
+ // int ret=0;
+  int cnt = 10;
   fd1 = create("haaa3.txt\0");
       printf("fd1 = %d\n",fd1);
   //int fd = open("bin/world");
-  if( fd1 == 0 )
-      printf("File not found!\n");
+  if( fd1 == -1 )
+      printf("Cannot create file!\n");
   else{
       // Read from the file specified by the FD.
-      read(buf,fd1);
-//      printf("fd = %d\n",fd1);
-      write("===HHHHHHHHHHHHHHH\0",fd1);
-
-//      printf("fd = %d\n",fd1);
+      write("123456789\0",fd1);
+      read(buf,fd1,cnt);
+      printf("Entire file contents:%s",buf);
+      seek(fd1,seek_inc);
+      read(buf,fd1,cnt);
+      printf("After seek= %d; File contents:%s",seek,buf);
+//
+//      if((ret = seek(fd1, 3)) != 0)
+//          printf("seek failure\n");
+////      printf("fd = %d\n",fd1);
+////      printf("Buffer = %s\n",buf);
+//      read(buf,fd1,cnt);
 //      printf("Buffer = %s\n",buf);
-      read(buf,fd1);
-      printf("Buffer = %s\n",buf);
-      // Close the file.
-      //close(fd);
+//      // Close the file.
+//      close(fd1);
   }
 
   return 0;

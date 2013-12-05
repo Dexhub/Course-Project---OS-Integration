@@ -6,7 +6,7 @@ char* convert_u(uint64_t, uint16_t);
 uint64_t fork();
 int getpid();
 void sleep(uint64_t);
-int read(char *, int);
+int read(char *, int, int);
 uint16_t write(const char*, int);
 int wait();
 int execve(const char*);
@@ -27,4 +27,5 @@ int open(char*);
 void close(int);
 int cd(char*);
 int create(char*);
+int seek(int, int);
 #endif

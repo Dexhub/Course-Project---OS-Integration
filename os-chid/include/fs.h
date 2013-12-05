@@ -20,6 +20,7 @@ struct super_block sb;
 
 struct inodes{
   char name[100];
+  uint32_t position;
   uint32_t size;
   uint64_t start_block;
   bool usage;
