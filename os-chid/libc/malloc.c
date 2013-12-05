@@ -76,7 +76,9 @@ void* malloc(int size){
 		}
 		else{
 		// No fitting block, so extend heap
+                last->free = 0;
 		b = extend_heap(last,s);
+                split_block(b, s);
 		if(!b)
 			return NULL; // No space available
 		}
