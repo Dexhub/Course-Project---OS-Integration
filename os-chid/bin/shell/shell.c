@@ -6,7 +6,7 @@
 volatile char a[] = "abcsdef\n";
 char prompt[] = "SBUINX> ";
 
-int parseline(const char *cmdline, struct cmdline_tokens *tok)
+int parseline(const char *cmdline, struct cmdline_tokens *tok) 
 {
 
     char array[100];          /* holds local copy of command line */
@@ -46,9 +46,13 @@ int parseline(const char *cmdline, struct cmdline_tokens *tok)
 
 void usage(){
     printf("1. cls - Clear Screen\n");
-    printf("2. exec filename - Execute a process\n");
+    printf("2. exec filename - Execute a process ( path shud be absolute eg: bin/hello )\n");
     printf("3. ps - print the current running process\n");
     printf("4. ls - List the contents of current working directory\n");
+    printf("5. ll - List the all the contents in the file system\n");
+    printf("6. cd ~ - Go to root directory\n");
+    printf("6. cd dirname - Go to that particular directory\n");
+    printf("7. pwd - Print working directory\n");
 }
 
 int exec(char* name){
@@ -65,6 +69,7 @@ int eval(char *cmdline)
     int j,ret=0;
     char cmd[100], tmp[100];
     /* Parse command line */
+     memset((char*)&tok, 0, sizeof(struct cmdline_tokens));
      parseline(cmdline, &tok);
 //     printf("argc = %d\n",tok.argc);
 //    for(i=0; i< tok.argc; i++){
@@ -73,6 +78,7 @@ int eval(char *cmdline)
 //      printf("argv %s\n",tok.argv[i]);
       strncpy(tmp, tok.argv[0], strlen(tok.argv[0]));
 //      printf("tmp %s len = %d\n",tmp,strlen(tmp));
+      //while(1);
       for(j=0; (tmp[j] != ' ' && tmp[j] != '\r' && j < strlen(tmp)); j++)
         cmd[j] = tmp[j];
       if(strcmp(cmd, "cls") == 0)
@@ -83,12 +89,15 @@ int eval(char *cmdline)
           usage();
       else if(strcmp(cmd, "exec") == 0){
 //          printf("calling exec\n");
-          ret = exec(tok.argv[1]);
+              ret = exec(tok.argv[1]);
      //     break;
       }
       else if(strcmp(cmd, "cd") == 0){
 //          printf("calling exec\n");
-          ret = cd(tok.argv[1]);
+          //if(strcmp(tok.argv[1], "~") == 0)
+              //ret = cd("~");
+          //else 
+              ret = cd(tok.argv[1]);
      //     break;
       }
       else if(strcmp(cmd, "ps") == 0)
@@ -107,9 +116,9 @@ int eval(char *cmdline)
 }
 
 /*
- * main - The shell's main routine
+ * main - The shell's main routine 
  */
-int main(int argc, char* argv[], char* envp[])
+int main(int argc, char* argv[], char* envp[]) 
 {
     char cmdline[100];    /* cmdline for fgets */
     int emit_prompt = 1; /* emit prompt (default) */
@@ -127,8 +136,8 @@ int main(int argc, char* argv[], char* envp[])
 //        printf("read %s from the terminal\n",cmdline);
         /* Remove the trailing newline */
         cmdline[strlen(cmdline)-1] = '\0';
-
-      // Forking a new Child to execute the command
+        
+      // Forking a new Child to execute the command 
        pid = fork();
         if(pid > 0){
           // In the child which is the actual worker
@@ -142,7 +151,7 @@ int main(int argc, char* argv[], char* envp[])
           wait();
           //printf("\nProcess %s exited normally pid = %d\n\n",cmdline,getpid());
         }
-    }
-
-  return 0;
+    } 
+   
+  return 0; 
 }

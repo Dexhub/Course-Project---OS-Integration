@@ -6,7 +6,7 @@ int find_cmdslot(HBA_PORT *port);
 
 HBA_MEM *abar;
 uint64_t *pages_for_ahci_start;
-uint64_t *pages_for_ahci_end;
+uint66_t *pages_for_ahci_end;
 uint64_t *pages_for_ahci_start_virtual;
 uint64_t *pages_for_ahci_end_virtual;
 
@@ -27,7 +27,7 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
 
     cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(DWORD);     // Command FIS size
     cmdheader->w = 1;               // Write to device
-    cmdheader->c = 1;               
+    cmdheader->c = 1;
 
     // 8K bytes (16 sectors) per PRDT
     cmdheader->prdtl = 1;    // PRDT entries count
@@ -76,9 +76,9 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
 
     while (1)
     {
-        // In some longer duration reads, it may be helpful to spin on the DPS bit 
+        // In some longer duration reads, it may be helpful to spin on the DPS bit
         // in the PxIS port field as well (1 << 5)
-        if ((port->ci & (1<<slot)) == 0) 
+        if ((port->ci & (1<<slot)) == 0)
         {
             break;
         }
@@ -208,9 +208,9 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
 
     while (1)
     {
-        // In some longer duration reads, it may be helpful to spin on the DPS bit 
+        // In some longer duration reads, it may be helpful to spin on the DPS bit
         // in the PxIS port field as well (1 << 5)
-        if ((port->ci & (1<<slot)) == 0) 
+        if ((port->ci & (1<<slot)) == 0)
         {
             break;
         }
@@ -396,7 +396,7 @@ void port_rebase(HBA_PORT *port, int portno){
         // Command table offset: 40K + 8K*portno + cmdheader_index*256
         cmdheader[i].ctba =  (((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))& 0xffffffff);
         cmdheader[i].ctbau= ((((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))>>32)& 0xffffffff);
-       
+
  		ctb_addr = 0;
         ctb_addr = ((( ctb_addr | cmdheader[i].ctbau ) << 32 ) | cmdheader[i].ctba );
         ctb_addr =  ctb_addr + AHCI_KERN_BASE;
@@ -408,7 +408,7 @@ void port_rebase(HBA_PORT *port, int portno){
 
     start_cmd(port);
 
-    port->is = 0;   
+    port->is = 0;
     port->ie = 0xffffffff;
 
 }
@@ -470,43 +470,18 @@ void init_ahci()
 
     uint32_t paddr = 0xFEBF0000;
 
-//    pages_for_ahci_start_virtual = ahci_alloc_pages(30); // 30 pages allocate -> Write_pages are 5 onwards
 
     void * virtAddr = (void *)sub_malloc(0,1);
     // Performs a virtual to physical mapping such that the virtual address is of the form 0000 0000 xxxx xxxx
     printf("\n==> Virtual address = %x",virtAddr);
     vmmgr_map_page_after_paging(paddr, (uint64_t) virtAddr, 0);
 
-    //memset(virtAddr, 0, VIRT_PAGE_SIZE);
 
     pages_for_ahci_start_virtual = (uint64_t*) sub_malloc(29 , 1);
     pages_for_ahci_start =(uint64_t*)((uint64_t)pages_for_ahci_start_virtual - (uint64_t)0xFFFFFFFF80000000);  // physical page start -> 32 pages assign
-    //printf("\n==> Virtual for buffer:%x\n Physical for buffer: %x",pages_for_ahci_start_virtual, pages_for_ahci_start);
     abar = (HBA_MEM *)virtAddr;
    //printf("\n Capablity : %p  PI : %p VI : %p Interrupt Status : %p", abar->cap, abar->pi,abar->vs,abar->is);
     probe_port(abar);
-    //printf("Back from probe_port");
-    //char *M = "Mike Ferdman Rocks\0";
-    /*char *C = ">>Chid Rocksi An operating system (OS) is a collection of software that manages computer hardware resources and provides common services for computer programs. The operating system is an essential component of the system software in a computer system. Application programs usually require an operating system to function.\
-Time-sharing operating systems schedule tasks for efficient use of the system and may also include accounting software for cost allocation of processor time, mass storage, printing, and other resources.\
-\
-For hardware functions such as input and output and memory allocation, the operating system acts as an intermediary between programs and the computer hardware,[1][2] although the application code is usually executed directly by the hardware and will frequently make a system call to an OS function or be interrupted by it. Operating systems can be found on almost any device that contains a computer—from cellular phones and video game consoles to supercomputers and web servers. \
-\
-Examples of popular modern operating systems include Android, BSD, iOS, Linux, OS X, QNX, Microsoft Windows,[3] Windows Phone, and IBM z/OS. All these, except Windows, Windows Phone and z/OS, share roots in UNIX.\0";*/
-    //char *O = "CSE 506 Rocks\0";
-    //char *I = "First -Initial \0";
-    //char *N = "Second - Next Value \0";
-
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //write_disk(0,I);
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //append_disk(N);
-    //write_disk(1,M);
-    //write_disk(3,O);
-
-    //printf("\nREAD DATA: %s",read_disk(0));
-    //printf("\nREAD DATA: %s",read_disk(1));
-    //printf("\nREAD DATA: %s",read_disk(3));
 }
 
 
