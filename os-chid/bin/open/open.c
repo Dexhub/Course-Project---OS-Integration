@@ -19,18 +19,20 @@ int main(){
       read(buf,fd,cnt);
       seek(fd,seek_inc);
       read(buf,fd,cnt);
-//      read(buf,fd,cnt);
-//      printf("\nAfter seek= %d; File contents:%s",seek,buf);
-//
-//      if((ret = seek(fd, 3)) != 0)
-//          printf("seek failure\n");
-////      printf("fd = %d\n",fd);
-////      printf("Buffer = %s\n",buf);
-//      read(buf,fd,cnt);
-//      printf("Buffer = %s\n",buf);
-//      // Close the file.
-//      close(fd);
   }
 
+char buf1[1000];
+  int fd1 = open("bin/open");
+  if( fd1 == 0 )
+      printf("File not found!\n");
+  else{
+      // Read from the file specified by the FD.
+      read(buf1,fd1,10);
+      printf("Tarfs file content\n");
+      printf("fd = %d",fd1);
+      printf("\nBuffer = %s\n",buf1);
+      // Close the file.
+      close(fd);
+   }
   return 0;
 }
