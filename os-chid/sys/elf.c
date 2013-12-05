@@ -95,7 +95,7 @@ void init_tarfs(){
         struct fs_tree* temp_rt = &rootfs;
         struct fs_tree* old_dir = &rootfs;
 
-        strncpy(rootfs.name, "rootfs/", 7);  
+        strncpy(rootfs.name, "rootfs/", 7);
         header = (struct posix_header_ustar*)(&_binary_tarfs_start);
          while( (uint64_t)header <= end ){
           if(strncmp(old_dir->name, (char*)header->name, strlen((char*)old_dir->name)) == 0)

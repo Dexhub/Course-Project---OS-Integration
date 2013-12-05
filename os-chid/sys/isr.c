@@ -308,7 +308,7 @@ void do_cls(){
 
 void do_ls(){
   print_ls();
-  //ls_fs();
+  ls_fs();
   return;
 }
 

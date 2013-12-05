@@ -1,3 +1,16 @@
+/*
+=========================FILE SYSTEM STRUCTURE============================
+--------------------------------------------------------------------------
+SECTOR 0    | SECTOR 1 & 2      | SECTOR 3,4 AND 5 | SECTOR 6 ONWARDS
+SUPERBLOCK  | BITMAP FOR BLOCKS | ARRAY OF INODES  | FILES AND DIRECTORIES
+--------------------------------------------------------------------------
+As of now, the file descriptor is the same as the index of the inode.
+Also, every file can use just one block. This is due to a bug that we
+havn't been able to solve; Writing one sector clears the values in the
+previous sectors
+
+*/
+
 #include <fs.h>
 #include <sys/fs_mmgr.h>
 #define INODE_COUNT 100
@@ -5,7 +18,7 @@
 #define TRUE 1
 #define FALSE 0
 #define INFLATE_CONSTANT 100 // all the file descritors of the disk will be greater than 100 and of tarfs will be lesser than 100.
-                             // Static Smart Hack
+                             // Static Smart Hack - smart is relative lol
 extern char* read_disk(int);
 extern char* write_disk(int,char*);
 extern char* write_disk2(int,char*);
@@ -13,53 +26,60 @@ extern uint64_t file_mmgr_memory_map[];
 extern char* read_disk(int);
 extern int append_disk(char* buf);
 
-int inflate(int fd)
+// --- Helper functions-----
+int inflate(int fd) //increase the file descriptor number by the inflate constant
 {
  // printf("\nInflating descriptor from %d to %d",fd,fd+INFLATE_CONSTANT);
   return (fd+INFLATE_CONSTANT);
 }
 
-int deflate(int fd)
+int deflate(int fd) //decrease the file descriptor number by the inflate constant
 {
  // printf("\nDeflating descriptor from %d to %d",fd,fd-INFLATE_CONSTANT);
   return (fd-INFLATE_CONSTANT);
 }
-int write_disk_superblock(DWORD offset, char* buf)
-{
-    char* write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    //printf("%p write buf\n",write_buffer);
-    memcpy(write_buffer,write_str,(sizeof(struct super_block)));
 
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
+// ----  functions to write to handle disk metadata --------
+
+int write_disk_superblock(DWORD offset, char* buf) // Function to write the superblock to the disk
+{
+  char* write_str = buf;
+  char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
+  //printf("%p write buf\n",write_buffer);
+  memcpy(write_buffer,write_str,(sizeof(struct super_block)));
+
+  uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
+  //printf("\n Writing : %s at location: %d", write_buffer,offset);
+  return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
 
 
-int write_disk_memory_map(DWORD offset, char* buf)
+int write_disk_memory_map(DWORD offset, char* buf)// Function to write the memory map to the disk
 {
-    char* write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-   // printf("%p write buf\n",write_buffer);
-    memcpy(write_buffer,write_str,BITMAP_COUNT);
+  char* write_str = buf;
+  char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
+  //printf("%p write buf\n",write_buffer);
+  memcpy(write_buffer,write_str,BITMAP_COUNT);
 
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
+  uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
+  //printf("\n Writing : %s at location: %d", write_buffer,offset);
+  return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
 
 
-int write_disk_inode(DWORD offset, char* buf)
+int write_disk_inode(DWORD offset, char* buf)// Function to write the inodes to the disk
 {
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    memcpy(write_buffer,write_str,sizeof(inode_list));
+  char *write_str = buf;
+  char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
+  memcpy(write_buffer,write_str,sizeof(inode_list));
 
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
+  uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
+  return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
-void update_structures(){
+
+
+void update_structures() // Update the meta data of the disk in memory
+{
   struct super_block* sbp = (struct super_block*)read_disk(0);
   uint64_t bitmap_offset = sbp->start_bitmap;
   uint64_t node_offset = sbp->start_inodes;
@@ -74,9 +94,9 @@ void update_structures(){
   return;
 }
 
-
-
-void rsync(){
+// Update the meta data on the disk from the values in memory
+void rsync()
+{
   write_disk_superblock(0,(char*)&sb);
   write_disk_memory_map(1,(char*)file_mmgr_memory_map);
   write_disk_inode(3,(char*)inode_list);
@@ -95,7 +115,9 @@ void rsync(){
   return;
 }
 
-void create_superblock(){
+// Initialize the system
+void create_superblock()
+{
   struct super_block* sbp;
   sbp = &sb;
   sbp->no_blocks = 65536;
@@ -111,76 +133,70 @@ void create_superblock(){
 
 }
 
-int get_free_inode(){
 
+// === Helper functions =====
+int get_free_inode()
+{
   int i;
   for(i=0; i<INODE_COUNT; i++)
   {
     if(inode_list[i].usage != TRUE)
      {
-        inode_list[i].usage = TRUE;
-        return i;
-
-      }
+       inode_list[i].usage = TRUE;
+       return i;
+     }
   }
-      printf("\n Error No free inode available");
-      return -1;
+  printf("\n Error No free inode available");
+  return -1;
 }
 
-int get_free_block(){
-
+int get_free_block()
+{
   int block = file_mmgr_alloc_block();
-  //printf("\n get_free: %d", block);
   if (block == -1)
-    {
-      printf("\nUnable to get free block");
-    }
+    printf("\nUnable to get free block");
   //rsync();
   return block;
 }
 
-int find_file(char *name){
+//Search a file inode based on the name
+int find_file(char *name)
+{
   //printf("\n Searching for %s",name);
   int i;
   for(i=0; i<INODE_COUNT; i++)
-  {
     if(strcmp(inode_list[i].name,name) == 0 && inode_list[i].type == TYPE_FILE)
-    {
       return i;
-    }
-  }
+
   return -1;
 }
 
-int find_directory(char *name){
+//Search a directory inode based on the name
+int find_directory(char *name)
+{
   //printf("\n Searching for %s directory",name);
   int i;
   for(i=0; i<INODE_COUNT; i++)
-  {
     if(strcmp(inode_list[i].name,name) == 0 && inode_list[i].type == TYPE_DIR)
-    {
       return i;
-    }
-  }
+
   return -1;
 }
 
-
-void flush_blocks(int block_number, char* contents){
-  //printf("\n Before reading from block--> %s ",read_disk(block_number));
+// Write contents to disk
+void flush_blocks(int block_number, char* contents)
+{
   write_disk(block_number,contents);
-  //printf("\n After writing to block--> %s ",read_disk(block_number));
 }
 
-int create_file(char *name){
-
+int create_file(char *name)
+{
   // Check if the file already exists, in such case, print the message and ask the user to use the write_function to write to the file
   printf("Creating file :%s \n",name);
    if(find_file(name) != -1)
     {
-        printf("\nFile with this name exists");
+        printf("File with this name exists\n");
         return -1;
-
     }
 
   int inode = get_free_inode();
@@ -188,59 +204,56 @@ int create_file(char *name){
 
   if(inode == -1 || sector_block == -1 )
     {
-      printf("\nUnable to create a file");
+      printf("Unable to create a file\n");
       return -1;
     }
- // printf("\n using inode:%d and block %d",inode,sector_block);
   strncpy(inode_list[inode].name,name,strlen(name));
   inode_list[inode].start_block = sector_block;
   inode_list[inode].type = TYPE_FILE;
-//  inode_list[inode].usage = TRUE;
 
   rsync();
   return inflate(inode);
-
 }
 
-int write_file(char *contents,int inode){
- //printf("\nInside write_file");
- inode = deflate(inode);
-   if(inode == -1)
-      {
-        printf("\nUnable to write to the file");
-        return -1;
-      }
-   else
-      {
-        int size = strlen(contents);
+int write_file(char *contents,int inode)
+{
+  //printf("\nInside write_file");
+  inode = deflate(inode);
+  if(inode == -1)
+    {
+      printf("\nUnable to write to the file");
+      return -1;
+    }
+  else
+    {
+      int size = strlen(contents);
+      printf("Writing contents:%s at file descriptor:%d \n",contents,inflate(inode));
+      inode_list[inode].size = size;
 
-        printf("Writing contents:%s at file descriptor:%d \n",contents,inflate(inode));
-        inode_list[inode].size = size;
-
-        rsync();
-        flush_blocks(inode_list[inode].start_block, contents);
-        return 1;
-      }
+      rsync();
+      flush_blocks(inode_list[inode].start_block, contents);
+      return 1;
+    }
 }
 
-void create_write_file(char *name, char*contents){
+void create_write_file(char *name, char*contents)
+{
     write_file(contents,create_file(name));
 }
 
-
-int make_directory(char *name){
+int make_directory(char *name)
+{
   printf("\n Creating directory : %s",name);
-   if(find_directory(name) != -1)
+  if(find_directory(name) != -1)
     {
-        printf("\nDirectory with this name exists");
-        return -1;
-
+      printf("\nDirectory with this name exists");
+      return -1;
     }
-
   int inode = get_free_inode();
   int sector_block = 0;
 
-//  printf("\n using inode:%d and block %d",inode,sector_block);
+  //  printf("\n using inode:%d and block %d",inode,sector_block);
+
   strncpy(inode_list[inode].name,name,strlen(name));
   inode_list[inode].size = 0;
   inode_list[inode].start_block = sector_block;
@@ -249,10 +262,10 @@ int make_directory(char *name){
 
   rsync();
   return inode;
-
 }
 
-int get_file_descriptor(char *name){
+int get_file_descriptor(char *name)
+{
   return find_file(name);
 }
 
@@ -265,7 +278,8 @@ void seek_file(int inode,int position)
   return;
 }
 
-char* read_file(int inode,int count,char* buf){
+char* read_file(int inode,int count,char* buf)
+{
   inode = deflate(inode);
   if(inode == -1)
     {
@@ -278,7 +292,6 @@ char* read_file(int inode,int count,char* buf){
       //printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
       char *contents = read_disk(inode_list[inode].start_block);
       int position = inode_list[inode].position;
-
       while(position != 0)
       {
         contents++;
@@ -295,30 +308,9 @@ char* read_file(int inode,int count,char* buf){
       return buf;
     }
 }
-/*
-char* read_file(int inode){
-  inode = deflate(inode);
-  if(inode == -1)
-    {
-      printf(" = No file found");
-      return NULL;
-    }
-  else
-    {
-      printf(" = File found!");
-      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
-      char *contents = read_disk(inode_list[inode].start_block);
-//      printf("\nFile contents :%s\n",contents);
-    //  printf("\n6 ->%s ",read_disk(6));
-    //  printf("\n7 ->%s ",read_disk(7));
-    //  printf("\n8 ->%s ",read_disk(8));
-    //  return read_disk(inode_list[inode].start_block);
-  //char *contents = read_disk(fd);
-      return contents;
-    }
-}*/
-char* read_file_by_name(char *name){
 
+char* read_file_by_name(char *name)
+{
   int count = 100;
   char buf[100];
   int fd = get_file_descriptor(name);
@@ -327,13 +319,13 @@ char* read_file_by_name(char *name){
   if (c!= NULL)
     {
      printf("\n File contents:%s",c);
-      return c;
+     return c;
     }
-
-
   //printf("\nNULL");
   return 0;
 }
+
+//creates file statically ; can be used for testing
 void create_file_static(){
 
   char *name = "Hello.txt\0";
@@ -364,8 +356,7 @@ void create_file_static(){
 
 
 
-
-
+// LS command for file system
 void ls_fs()
 {
   printf("-------Disk Contents:-----\n");
@@ -386,6 +377,7 @@ void ls_fs()
 
 }
 
+//dummy function to test functionality
 int get_sb()
 {
  // read_file_by_name("Name ");
@@ -396,7 +388,7 @@ int get_sb()
   return 1;
 }
 
-
+// Creates a superblock and also sets mmap
 int set_sb()
 {
   create_superblock();
