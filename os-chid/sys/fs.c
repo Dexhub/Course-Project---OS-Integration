@@ -75,6 +75,7 @@ void update_structures(){
 }
 
 
+
 void rsync(){
   write_disk_superblock(0,(char*)&sb);
   write_disk_memory_map(1,(char*)file_mmgr_memory_map);
@@ -251,35 +252,9 @@ int make_directory(char *name){
 
 }
 
-void create_file_static(){
-
-  char *name = "Hello.txt\0";
-  char *contents = "Hello World!!\0";
-  create_write_file(name,contents);
-
-//  name = "Hello2.txt\0";
-//  contents = "CLUB 205 Hello World!!\0";
-//  create_write_file(name,contents);
-//  name = "Hello267.txt\0";
-//  create_write_file(name,contents);
-//
-//  name = "Hello3.txt\0";
-//  contents = "C3333333333LUB 205 Hello World!!\0";
-//  create_file(name,contents);
-//
-//  name = "Hello4.txt\0";
-//  contents = "C444444444444444LUB 205 Hello World!!\0";
-//  create_file(name,contents);
-//  name = "root_directory\0";
-//
-//  make_directory(name);
-//
-}
-
 int get_file_descriptor(char *name){
   return find_file(name);
 }
-
 char* read_file(int inode){
   inode = deflate(inode);
   if(inode == -1)
@@ -301,9 +276,6 @@ char* read_file(int inode){
       return contents;
     }
 }
-
-
-
 char* read_file_by_name(char *name){
 
   int fd = get_file_descriptor(name);
@@ -319,6 +291,37 @@ char* read_file_by_name(char *name){
   //printf("\nNULL");
   return 0;
 }
+void create_file_static(){
+
+  char *name = "Hello.txt\0";
+  char *contents = "Hello World!!\0";
+  create_write_file(name,contents);
+
+  name = "Hello2.txt\0";
+  contents = "CLUB 205 Hello World!!\0";
+  create_write_file(name,contents);
+  name = "Hello267.txt\0";
+  create_write_file(name,contents);
+  read_file_by_name("Hello.txt\0");
+  read_file_by_name("Hello2.txt\0");
+  read_file_by_name("Hello267.txt\0");
+//
+//  name = "Hello3.txt\0";
+//  contents = "C3333333333LUB 205 Hello World!!\0";
+//  create_file(name,contents);
+//
+//  name = "Hello4.txt\0";
+//  contents = "C444444444444444LUB 205 Hello World!!\0";
+//  create_file(name,contents);
+//  name = "root_directory\0";
+//
+//  make_directory(name);
+//
+}
+
+
+
+
 
 void ls()
 {
@@ -345,8 +348,8 @@ int get_sb()
  // read_file_by_name("Name ");
 //  read_file_by_name("Hello.txt ");
 //  read_file_by_name("Hello.txt\0");
-//  create_file_static();
-//  ls();
+  create_file_static();
+  ls();
   return 1;
 }
 
