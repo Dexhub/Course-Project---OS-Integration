@@ -175,7 +175,7 @@ void flush_blocks(int block_number, char* contents){
 int create_file(char *name){
 
   // Check if the file already exists, in such case, print the message and ask the user to use the write_function to write to the file
-  printf("\n Creating file :%s",name);
+  printf("Creating file :%s \n",name);
    if(find_file(name) != -1)
     {
         printf("\nFile with this name exists");
@@ -214,7 +214,7 @@ int write_file(char *contents,int inode){
       {
         int size = strlen(contents);
 
-        printf("\n Writing file contents using inode:%d",inode);
+        printf("Writing contents:%s at file descriptor:%d \n",contents,inflate(inode));
         inode_list[inode].size = size;
 
         rsync();
@@ -258,12 +258,15 @@ int get_file_descriptor(char *name){
 
 void seek_file(int inode,int position)
 {
+  inode = deflate(inode);
+  printf("seeking by %d position\n",position);
   position = (position + inode_list[inode].position ) % inode_list[inode].size;
   inode_list[inode].position = position;
   return;
 }
 
 char* read_file(int inode,int count,char* buf){
+  inode = deflate(inode);
   if(inode == -1)
     {
       printf(" = No file found");
@@ -271,8 +274,8 @@ char* read_file(int inode,int count,char* buf){
     }
   else
     {
-      printf(" = File found!");
-//      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
+      //printf(" = File found!");
+      //printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
       char *contents = read_disk(inode_list[inode].start_block);
       int position = inode_list[inode].position;
 
@@ -285,6 +288,7 @@ char* read_file(int inode,int count,char* buf){
       //printf("\n Size of buffer:%d",sizeof(buf));
       memcpy(buf,(const char *)&s,sizeof(buf));
       memcpy(buf,contents,count);
+      position = inode_list[inode].position;
       //update cursor position in the file and make sure it is within the file size range
       position = (position + count) % inode_list[inode].size;
       inode_list[inode].position = position;
@@ -362,9 +366,9 @@ void create_file_static(){
 
 
 
-void ls()
+void ls_fs()
 {
-  //printf("\n-------Disk Contents-----");
+  printf("-------Disk Contents:-----\n");
   update_structures();
   int inode;
   for(inode=0; inode<INODE_COUNT-95; inode++)
@@ -374,9 +378,9 @@ void ls()
     if(inode_list[inode].usage == TRUE)
       {
         if(inode_list[inode].size == 0)
-          printf("\n| %s\\ ",inode_list[inode].name);
+          printf("| %s\\ \n",inode_list[inode].name);
         else
-          printf("\n| %s ",inode_list[inode].name);
+          printf("| %s \n",inode_list[inode].name);
       }
   }
 
@@ -387,8 +391,8 @@ int get_sb()
  // read_file_by_name("Name ");
 //  read_file_by_name("Hello.txt ");
 //  read_file_by_name("Hello.txt\0");
-  create_file_static();
-  ls();
+ // create_file_static();
+ // ls();
   return 1;
 }
 

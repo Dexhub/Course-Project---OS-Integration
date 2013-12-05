@@ -1,4 +1,4 @@
-cscope 15 $HOME/os-integration/os-chid               0000412396
+cscope 15 $HOME/os-integration/os-chid               0000412271
 	@bin/hello/hello.c
 
 1 
@@ -79,7 +79,7 @@ no
 buf
 ,
 STDIN
-, -1)) == -1);
+,-1)) == -1);
 
 20 
 	`¥ötf
@@ -263,91 +263,67 @@ tok
 buf
 ;
 
-35 i‡(!
-	`°rcmp
-(
-tok
-->
-¨gv
-[0], "quit")) {
-
-36 
-tok
-->
-buûtös
- = 
-BUILTIN_QUIT
-;
-
-37 } i‡(!
-	`°rcmp
-(
-tok
-->
-¨gv
-[0], "jobs")) {
-
-38 
-tok
-->
-buûtös
- = 
-BUILTIN_JOBS
-;
-
-40 
-tok
-->
-buûtös
- = 
-BUILTIN_NONE
-;
-
-42 
+35 
 buf
  = bu‡+ 1 + 
 √xt_°r_öd
 ;
 
-45 
+38 
 	}
 }
 
-47 
+40 
 	$ußge
 (){
 
-48 
+41 
 	`¥ötf
 ("1. cls - Clear Screen\n");
 
-49 
+42 
 	`¥ötf
-("2.Éxec filename - ExecuteáÖrocess\n");
+("2.Éxec filename - ExecuteáÖrocess (Öath shud beábsoluteÉg: bin/hello )\n");
 
-50 
+43 
 	`¥ötf
 ("3.Ös -ÖrintÅhe currentÑunningÖrocess\n");
 
-51 
+44 
 	`¥ötf
 ("4.Üs - ListÅhe contents of current working directory\n");
 
-52 
+45 
+	`¥ötf
+("5.Ül - ListÅheállÅhe contents inÅhe file system\n");
+
+46 
+	`¥ötf
+("6. cd ~ - GoÅoÑoot directory\n");
+
+47 
+	`¥ötf
+("6. cd dirname - GoÅoÅhatÖarticular directory\n");
+
+48 
+	`¥ötf
+("7.Öwd - Print working directory\n");
+
+49 
 	}
 }
 
-54 
+51 
 	$exec
 (* 
 «me
 ){
 
-55 
+52 
 ªt
 ;
 
-57 
+54 
 ªt
  = 
 	`execve
@@ -355,39 +331,47 @@ buf
 «me
 );
 
-58  
+55  
 ªt
 ;
 
-59 
+56 
 	}
 }
 
-62 
+59 
 	$evÆ
 (*
 cmdlöe
 )
 
-64 
+61 
 cmdlöe_tokís
  
 tok
 ;
 
-65 
+62 
 j
 ,
 ªt
 =0;
 
-66 
+63 
 cmd
 [100], 
 tmp
 [100];
 
-68 
+65 
+	`mem£t
+((*)&
+tok
+, 0, (
+cmdlöe_tokís
+));
+
+66 
 	`∑r£löe
 (
 cmdlöe
@@ -395,19 +379,19 @@ cmdlöe
 tok
 );
 
-71 
+69 
 	`mem£t
 (
 cmd
 , 0, (cmd));
 
-72 
+70 
 	`mem£t
 (
 tmp
 , 0, (tmp));
 
-74 
+72 
 	`°∫˝y
 (
 tmp
@@ -419,7 +403,7 @@ tok
 	`°æí
 (tok.argv[0]));
 
-76 
+75 
 j
 =0; (
 tmp
@@ -427,7 +411,7 @@ tmp
 	`°æí
 (tmp)); j++)
 
-77 
+76 
 cmd
 [
 j
@@ -435,43 +419,43 @@ j
 tmp
 [j];
 
-78 if(
+77 if(
 	`°rcmp
 (
 cmd
 , "cls") == 0)
 
-79 
+78 
 	`˛s
 ();
 
-80 if(
+79 if(
 	`°rcmp
 (
 cmd
 , "pwd") == 0)
 
-81 
+80 
 	`¥öt_pwd
 ();
 
-82 if(
+81 if(
 	`°rcmp
 (
 cmd
 , "h") == 0)
 
-83 
+82 
 	`ußge
 ();
 
-84 if(
+83 if(
 	`°rcmp
 (
 cmd
 , "exec") == 0){
 
-86 
+85 
 ªt
  = 
 	`exec
@@ -481,13 +465,13 @@ tok
 ¨gv
 [1]);
 
-89 if(
+88 if(
 	`°rcmp
 (
 cmd
 , "cd") == 0){
 
-91 
+93 
 ªt
  = 
 	`cd
@@ -497,41 +481,41 @@ tok
 ¨gv
 [1]);
 
-94 if(
+96 if(
 	`°rcmp
 (
 cmd
 , "ps") == 0)
 
-95 
-	`exec
-("bin/ps");
-
-96 if(
-	`°rcmp
-(
-cmd
-, "ll") == 0)
-
 97 
 	`exec
-("bin/ll");
+("bin/ps");
 
 98 if(
 	`°rcmp
 (
 cmd
-, "ls") == 0)
+, "ll") == 0)
 
 99 
 	`exec
-("bin/ls");
+("bin/ll");
+
+100 if(
+	`°rcmp
+(
+cmd
+, "ls") == 0)
 
 101 
+	`exec
+("bin/ls");
+
+103 
 	`¥ötf
 ("Enterá valid command\n");
 
-104 i‡(
+106 i‡(
 tok
 .
 ¨gv
@@ -539,15 +523,15 @@ tok
 NULL
 )  -1;
 
-106  
+108  
 ªt
 ;
 
-107 
+109 
 	}
 }
 
-112 
+114 
 	$maö
 (
 ¨gc
@@ -557,41 +541,41 @@ NULL
 ívp
 [])
 
-114 
+116 
 cmdlöe
 [100];
 
-115 
+117 
 emô_¥om±
  = 1;
 
-116 
+118 
 pid
 , 
 ªt
 ;
 
-119 
+121 
 	`¥ötf
 ("Welcome USER. Type h for help\n");
 
-122 
+124 
 	`mem£t
 (
 cmdlöe
 , '\0', (cmdline));
 
-123 i‡(
+125 i‡(
 emô_¥om±
 ) {
 
-124 
+126 
 	`¥ötf
 ("%s", 
 ¥om±
 );
 
-126 
+128 
 	`ªad
 (
 cmdlöe
@@ -599,23 +583,23 @@ cmdlöe
 STDIN
 , -1);
 
-129 
+131 
 cmdlöe
 [
 	`°æí
 (cmdline)-1] = '\0';
 
-132 
+134 
 pid
  = 
 	`f‹k
 ();
 
-133 if(
+135 if(
 pid
  > 0){
 
-135 
+137 
 ªt
  = 
 	`evÆ
@@ -623,23 +607,23 @@ pid
 cmdlöe
 );
 
-136 if(
+138 if(
 ªt
  == -1)
 
-137 
+139 
 	`¥ötf
 ("Bad FileÇame\n");
 
-139 
+141 
 	`exô
 (1);
 
-142 
+144 
 	`waô
 ();
 
-148 
+150 
 	}
 }
 
@@ -9537,7 +9521,7 @@ rdi
 vÆ
  = -1;
 
-85 
+86 
 vÆ
  = 
 	`d‹ód
@@ -9551,23 +9535,15 @@ rsi
 rdx
 );
 
-88 6: 
+89 6: 
 	`waô
 ();
 
-90 7: 
-	`¥ötf
-("exe¯fûê%s\n",(*)
-r
-->
-rdi
-);
-
-91 
+92 
 vÆ
  = -1;
 
-92 
+93 
 vÆ
  = 
 	`do_execve
@@ -9577,19 +9553,19 @@ r
 rdi
 );
 
-95 8: 
+96 8: 
 	`¥öt_¥o˚ss
 ();
 
-97 9: 
+98 9: 
 	`do_˛s
 ();
 
-99 10: 
+100 10: 
 	`do_ls
 ();
 
-101 11: 
+102 11: 
 vÆ
  = ()
 	`do_sbrk
@@ -9599,11 +9575,11 @@ r
 rdi
 );
 
-103 12: 
+104 12: 
 vÆ
  = 0;
 
-104 
+105 
 vÆ
  = 
 	`do_›í
@@ -9613,7 +9589,7 @@ r
 rdi
 );
 
-107 13: 
+108 13: 
 	`do_˛o£
 (()
 r
@@ -9621,13 +9597,13 @@ r
 rdi
 );
 
-110 
+111 
 vÆ
  = 
 	`sys_gëpid
 ();
 
-112 21: 
+113 21: 
 vÆ
  = 
 	`ch™ged
@@ -9637,15 +9613,15 @@ r
 rdi
 );
 
-115 
+116 
 	`do_pwd
 ();
 
-117 23: 
+118 23: 
 vÆ
  = -1;
 
-118 
+119 
 vÆ
  = 
 	`do_¸óã
@@ -9655,11 +9631,11 @@ r
 rdi
 );
 
-120 24: 
+121 24: 
 vÆ
  = -1;
 
-121 
+122 
 vÆ
  = 
 	`do_£ek
@@ -9671,19 +9647,19 @@ rdi
 rsi
 );
 
-125 : 
+126 : 
 	`wrôe_°rög
 (0x1F," Unknown Exception. System Halted!\n");
 
-131  
+132  
 vÆ
 ;
 
-132 
+133 
 	}
 }
 
-134 
+135 
 	$idt_£t_g©e
 (
 numbî
@@ -9699,7 +9675,7 @@ uöt16_t
 Êags
 ) {
 
-138 
+139 
 idt
 [
 numbî
@@ -9709,7 +9685,7 @@ ba£Low
 ba£
  & 0xFFFF;
 
-139 
+140 
 idt
 [
 numbî
@@ -9719,7 +9695,7 @@ ba£Mid
 ba£
  >> 16) & 0xFFFF;
 
-140 
+141 
 idt
 [
 numbî
@@ -9729,7 +9705,7 @@ ba£High
 ba£
  >> 32) & 0xFFFFFFFF;
 
-143 
+144 
 idt
 [
 numbî
@@ -9737,7 +9713,7 @@ numbî
 £À˘‹
  = selector;
 
-144 
+145 
 idt
 [
 numbî
@@ -9745,7 +9721,7 @@ numbî
 Êags
  = flags;
 
-147 
+148 
 idt
 [
 numbî
@@ -9753,7 +9729,7 @@ numbî
 ª£rvedI°
  = 0;
 
-148 
+149 
 idt
 [
 numbî
@@ -9761,35 +9737,35 @@ numbî
 ª£rved
  = 0;
 
-149 
+150 
 	}
 }
 
-151 
+152 
 	$x86_64_asm_…r
 (){
 
-152 
+153 
 uöt16_t
  
 vÆ
  = 0x2B;
 
-153 
+154 
 	`_x86_64_asm_…r
 (&
 vÆ
 );
 
-154 
+155 
 	}
 }
 
-156 
+157 
 	$ªlﬂd_idt
 () {
 
-158 
+159 
 	`mem£t
 (&
 idt
@@ -9797,7 +9773,7 @@ idt
 idtE¡ry
 ) * 256);
 
-159 
+160 
 	`idt_£t_g©e
 (0, (
 uöt64_t
@@ -9805,7 +9781,7 @@ uöt64_t
 _i§0
 , 0x08, 0x8E);
 
-160 
+161 
 	`idt_£t_g©e
 (1, (
 uöt64_t
@@ -9813,7 +9789,7 @@ uöt64_t
 _i§1
 , 0x08, 0x8E);
 
-161 
+162 
 	`idt_£t_g©e
 (0xD, (
 uöt64_t
@@ -9821,7 +9797,7 @@ uöt64_t
 _i§13
 , 0x08, 0x8E);
 
-162 
+163 
 	`idt_£t_g©e
 (0xE, (
 uöt64_t
@@ -9829,7 +9805,7 @@ uöt64_t
 _i§14
 , 0x08, 0x8E);
 
-163 
+164 
 	`idt_£t_g©e
 (0x80, (
 uöt64_t
@@ -9837,17 +9813,17 @@ uöt64_t
 _i§80
 , 0x08, 0xEE);
 
-164 
+165 
 	`_x86_64_asm_lidt
 (&
 idå
 );
 
-165 
+166 
 	`x86_64_asm_…r
 ();
 
-166 
+167 
 	}
 }
 
@@ -12398,7 +12374,7 @@ wrôe_fûe
 (*,);
 
 27 
-£ek
+£ek_fûe
 (,);
 
 28 
@@ -13411,13 +13387,19 @@ fd
 buf
 );
 
-241 if(
+238 
+	`¥ötf
+("\¿ªad: %s",
+buf
+);
+
+242 if(
 fûe_u£d
 [
 fd
 ] == 1){
 
-242 *
+243 *
 §c
  = 
 	`èrfs_ªad
@@ -13427,7 +13409,7 @@ fûes
 fd
 ]);
 
-243 
+244 
 	`mem˝y
 (
 buf
@@ -13437,37 +13419,37 @@ buf
 ˙t
 );
 
-247 
+248 
 	`¥ötf
 ("File isálready open byánotherÖrocess\n");
 
-251 
+252 
 	}
 }
 
-253 
+254 
 	$ãmp
 (){
 
-255 
+256 
 	}
 }
 
-256 
+257 
 	$waô
 (){
 
-257 
+258 
 __asm__
  
 	`__vﬁ©ûe__
 ("sti");
 
-260 
+261 
 	`ãmp
 ();
 
-262 vﬁ©ûê
+263 vﬁ©ûê
 kthªad
 * 
 √xt
@@ -13477,23 +13459,23 @@ cuºítThªad
 hód
 .next;
 
-263 if(
+264 if(
 √xt
  !
 NULL
 )
 
-269 
+270 
 	}
 }
 
-271 
+272 
 	$do_execve
 (* 
 «me
 ){
 
-272 * 
+273 * 
 °¨t
  = 
 	`èrfs_ªad
@@ -13501,85 +13483,55 @@ NULL
 «me
 );
 
-273 
-	`¥ötf
-("in do_execve\n");
-
-274 if–!
+275 if–!
 °¨t
  ){
 
-278 
+279 
 	`maö_execve
 (
 «me
 );
 
-279 
-	`¥ötf
-("iffn do_execve\n");
-
-280 
-	`dißbÀ_öãºu±s
-();
-
 281 
-	`ru¬abÀ_kthªad
-(
-cuºítThªad
-);
-
-282 
-	`íabÀ_öãºu±s
-();
-
-283 
-	`¥ötf
-("iffggn do_execve\n");
-
-284 
 	`ScheduÀ
 ();
 
 285 
-	`¥ötf
-("returning hereee\n");
-
-288 
 	}
 }
 
-290 
+287 
 	$¥öt_¥o˚ss
 (){
 
-291 
+288 
 kthªad
 * 
 k_thªad
 ;
 
-292 
+289 
 uöt16_t
  
 i
 ;
 
-293 * 
+290 * 
 mode
 ;
 
-294 
+291 
 	`¥ötf
 ("Name PID Mode\n");
 
-295 
+292 
 i
 =2; i < 
 √xtFªePid
  ; i++){
 
-298 
+295 
 k_thªad
  = 
 ±abÀ
@@ -13587,21 +13539,21 @@ k_thªad
 i
 ];
 
-299 if(
+296 if(
 k_thªad
 ->
 kî√l_thªad
  == 1)
 
-300 
+297 
 mode
  = "Kernel";
 
-302 
+299 
 mode
  = "User";
 
-303 
+300 
 	`¥ötf
 ("%†%d %†%d\n",
 k_thªad
@@ -13615,57 +13567,57 @@ mode
 √xtFªePid
 );
 
-305 
+302 
 	}
 }
 
-307 
+304 
 	$do_˛s
 (){
 
-308 
+305 
 	`˛s
 ();
 
-310 
+307 
 	}
 }
 
-312 
+309 
 	$do_ls
 (){
 
-313 
+310 
 	`¥öt_ls
 ();
 
-315 
+312 
 	}
 }
 
-317 
+314 
 	$do_Œ
 (){
 
-318 
+315 
 	`¥öt_Œ
 ();
 
-320 
+317 
 	}
 }
 
-322 
+319 
 	$do_sbrk
 (
 ¥
 ){
 
-323 if(
+320 if(
 ¥
  != 0){
 
-324 
+321 
 cuºítThªad
 ->
 brk
@@ -13673,27 +13625,27 @@ brk
 ¥
 ;
 
-326  
+323  
 cuºítThªad
 ->
 brk
 ;
 
-327 
+324 
 	}
 }
 
-329 
+326 
 	$do_›í
 (* 
 «me
 ){
 
-330 
+327 
 fd
 ;
 
-331 
+328 
 fd
  = 
 	`èrfs_›í
@@ -13701,45 +13653,45 @@ fd
 «me
 );
 
-332  
+329  
 fd
 ;
 
-333 
+330 
 	}
 }
 
-335 
+332 
 	$do_˛o£
 (
 fd
 ){
 
-339 if(
+336 if(
 fd
  < 50)
 
-340 
+337 
 fûe_u£d
 [
 fd
 ]=0;
 
-342 
+339 
 	}
 }
 
-344 
+341 
 	$ch™ged
 (* 
 «me
 ){
 
-345 
+342 
 ªt
 ;
 
-346 
+343 
 ªt
  = 
 	`do_cd
@@ -13747,33 +13699,33 @@ fd
 «me
 );
 
-347  
+344  
 ªt
 ;
 
-348 
+345 
 	}
 }
 
-350 
+347 
 	$do_pwd
 (){
 
-351 
+348 
 	`¥öt_pwd
 ();
 
-353 
+350 
 	}
 }
 
-355 
+352 
 	$do_¸óã
 (* 
 «me
 ){
 
-356 
+353 
 fd
  = 
 	`¸óã_fûe
@@ -13781,15 +13733,15 @@ fd
 «me
 );
 
-359  
+356  
 fd
 ;
 
-360 
+357 
 	}
 }
 
-362 
+359 
 	$do_£ek
 (
 fd
@@ -13797,15 +13749,15 @@ fd
 pos
 ){
 
-363 
-	`£ek
+360 
+	`£ek_fûe
 (
 fd
 ,
 pos
 );
 
-365 
+362 
 	}
 }
 

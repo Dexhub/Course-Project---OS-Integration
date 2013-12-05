@@ -82,12 +82,13 @@ int fault_handler(regs *r)
                                   break;
                           case 5: // Read
                                   val = -1;
+                                  //printf("read received\n");
                                   val = doread((char*)r->rdi, (int)r->rsi, (int)r->rdx);
                                   //printf("returning %d to %d",val,currentThread->pid);
                                   break;
                           case 6: wait();
                                   break;
-                          case 7: 
+                          case 7:
                                   val = -1;
                                   val = do_execve((char*)r->rdi);
                                  // printf("val = %d\n",val);
@@ -98,7 +99,7 @@ int fault_handler(regs *r)
                                   break;
                           case 10: do_ls();
                                    break;
-                          case 11: val = (int)do_sbrk((int)r->rdi);  
+                          case 11: val = (int)do_sbrk((int)r->rdi);
                                    break;
                           case 12: val = 0;
                                    val = do_open((char*)r->rdi);
@@ -106,12 +107,12 @@ int fault_handler(regs *r)
                                    break;
                           case 13: do_close((int)r->rdi);
                                    break;
-                          case 20:// GetPID 
+                          case 20:// GetPID
                                   val = sys_getpid();
                                   break;
                           case 21: val = changed((char*)r->rdi);
                                   break;
-                          case 22: 
+                          case 22:
                                   do_pwd();
                                   break;
                           case 23: val = -1;
@@ -132,7 +133,7 @@ int fault_handler(regs *r)
 }
 
 void idt_set_gate(unsigned char number, uint64_t base, uint16_t selector, unsigned char flags) {
-  
+
   /* Set Base Address */
   /* Set Base Address */
   idt[number].baseLow = base & 0xFFFF;
@@ -142,7 +143,7 @@ void idt_set_gate(unsigned char number, uint64_t base, uint16_t selector, unsign
   /* Set Selector */
   idt[number].selector = selector;
   idt[number].flags = flags;
-                    
+
   /* Set Reserved Areas to Zero */
   idt[number].reservedIst = 0;
   idt[number].reserved = 0;

@@ -32,11 +32,6 @@ BLOCKS_PER_BYTE	include/sys/mm/mmgr.h	4;"	d
 BLOCK_ALIGN	include/sys/mm/mmgr.h	8;"	d
 BLOCK_SIZE	include/sys/mm/mmgr.h	7;"	d
 BLOCK_SIZE	libc/malloc.c	18;"	d	file:
-BUILTIN_BG	include/sys/shell.h	/^        BUILTIN_BG,$/;"	e	enum:cmdline_tokens::builtins_t
-BUILTIN_FG	include/sys/shell.h	/^        BUILTIN_FG} builtins;$/;"	e	enum:cmdline_tokens::builtins_t
-BUILTIN_JOBS	include/sys/shell.h	/^        BUILTIN_JOBS,$/;"	e	enum:cmdline_tokens::builtins_t
-BUILTIN_NONE	include/sys/shell.h	/^        BUILTIN_NONE,$/;"	e	enum:cmdline_tokens::builtins_t
-BUILTIN_QUIT	include/sys/shell.h	/^        BUILTIN_QUIT,$/;"	e	enum:cmdline_tokens::builtins_t
 BYTE	include/ahci.h	/^typedef uint8_t BYTE;$/;"	t
 C	include/sys/gdt.h	18;"	d
 CC	Makefile	/^CC=gcc$/;"	m
@@ -508,8 +503,6 @@ bohc	include/ahci.h	/^    DWORD   bohc;       \/\/ 0x28, BIOS\/OS handoff contro
 bool	include/defs.h	/^} bool;$/;"	t	typeref:enum:__anon2
 boot	sys/main.c	/^void boot(void)$/;"	f
 brk	include/sys/kthread.h	/^    int brk;$/;"	m	struct:Kernel_Thread
-builtins	include/sys/shell.h	/^        BUILTIN_FG} builtins;$/;"	m	struct:cmdline_tokens	typeref:enum:cmdline_tokens::builtins_t
-builtins_t	include/sys/shell.h	/^    enum builtins_t {       \/* Indicates if argv[0] is a builtin command *\/$/;"	g	struct:cmdline_tokens
 bump_addr	sys/mm/vmmgr_virtual.c	/^uint64_t bump_addr = 0;$/;"	v
 bump_start	sys/mm/vmmgr_virtual.c	/^uint64_t bump_start = 0;$/;"	v
 c	include/ahci.h	/^    BYTE    c:1;        \/\/ 1: Command, 0: Control$/;"	m	struct:tagFIS_REG_H2D
@@ -656,6 +649,7 @@ find_block	sys/mm/myalloc.c	/^t_block find_block(t_block *last, uint16_t size){$
 find_cmdslot	sys/ahci.c	/^int find_cmdslot(HBA_PORT *port)$/;"	f
 find_directory	sys/fs.c	/^int find_directory(char *name){$/;"	f
 find_file	sys/fs.c	/^int find_file(char *name){$/;"	f
+first_char	sys/stdfns.c	/^int first_char = 0;$/;"	v
 fis_type	include/ahci.h	/^    BYTE    fis_type;    \/\/ FIS_TYPE_REG_D2H$/;"	m	struct:tagFIS_REG_D2H
 fis_type	include/ahci.h	/^    BYTE    fis_type;   \/\/ FIS_TYPE_DATA$/;"	m	struct:tagFIS_DATA
 fis_type	include/ahci.h	/^    BYTE    fis_type;   \/\/ FIS_TYPE_DMA_SETUP$/;"	m	struct:tagFIS_DMA_SETUP
@@ -1099,7 +1093,7 @@ sd_zero	sys/gdt.c	/^	uint64_t sd_zero:5;    \/* must be zero *\/$/;"	m	struct:sy
 seconds_tens	sys/timer.c	/^uint16_t seconds_tens=0;$/;"	v
 seconds_units	sys/timer.c	/^uint16_t seconds_units=0;$/;"	v
 seek	libc/seek.c	/^int seek(int fd,int pos){$/;"	f
-seek	sys/fs.c	/^void seek(int inode,int position)$/;"	f
+seek_file	sys/fs.c	/^void seek_file(int inode,int position)$/;"	f
 seg_actual_start	include/elf.h	/^uint64_t seg_actual_start;$/;"	m	struct:exec
 seg_length	include/elf.h	/^uint32_t seg_length;$/;"	m	struct:exec
 seg_mem	include/elf.h	/^void* seg_mem;$/;"	m	struct:exec
@@ -1292,7 +1286,6 @@ write	libc/syscalls.s	/^write:$/;"	l
 write	sys/isr.c	/^void write(const char* str, int fd){$/;"	f
 write_char	sys/stdfns.c	/^void write_char(int color, char c)$/;"	f
 write_disk	sys/ahci.c	/^int write_disk(DWORD offset, char* buf)$/;"	f
-write_disk2	sys/ahci.c	/^int write_disk2(DWORD offset, char* buf)$/;"	f
 write_disk_inode	sys/fs.c	/^int write_disk_inode(DWORD offset, char* buf)$/;"	f
 write_disk_memory_map	sys/fs.c	/^int write_disk_memory_map(DWORD offset, char* buf)$/;"	f
 write_disk_superblock	sys/fs.c	/^int write_disk_superblock(DWORD offset, char* buf)$/;"	f

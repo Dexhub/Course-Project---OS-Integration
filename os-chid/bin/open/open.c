@@ -3,32 +3,33 @@
 
 int main(){
   char buf[1000];
-  int fd1;
-//  int seek_inc = 3;
- // int ret=0;
-  int cnt = 10;
-  fd1 = create("New file.txt\0");
-      printf("fd1 = %d\n",fd1);
-  //int fd = open("bin/world");
-  if( fd1 == -1 )
+  int fd;
+  int seek_inc = 1;
+  int cnt = 1;
+  fd = create("New file.txt\0");
+  if( fd == -1 )
       printf("Cannot create file!\n");
   else{
       // Read from the file specified by the FD.
-      write("123456789\0",fd1);
-      read(buf,fd1,cnt);
-      printf("\nEntire file contents:%s",buf);
-      //seek(fd1,seek_inc);
-      read(buf,fd1,cnt);
-      printf("\nAfter seek= %d; File contents:%s",seek,buf);
+      write("123456789\0",fd);
+      read(buf,fd,cnt);
+      seek(fd,seek_inc);
+      read(buf,fd,cnt);
+      seek(fd,seek_inc);
+      read(buf,fd,cnt);
+      seek(fd,seek_inc);
+      read(buf,fd,cnt);
+//      read(buf,fd,cnt);
+//      printf("\nAfter seek= %d; File contents:%s",seek,buf);
 //
-//      if((ret = seek(fd1, 3)) != 0)
+//      if((ret = seek(fd, 3)) != 0)
 //          printf("seek failure\n");
-////      printf("fd = %d\n",fd1);
+////      printf("fd = %d\n",fd);
 ////      printf("Buffer = %s\n",buf);
-//      read(buf,fd1,cnt);
+//      read(buf,fd,cnt);
 //      printf("Buffer = %s\n",buf);
 //      // Close the file.
-//      close(fd1);
+//      close(fd);
   }
 
   return 0;

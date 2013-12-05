@@ -98,19 +98,7 @@ int write_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWO
     return 1;
 }
 
-/*
-int append_at(char* buf)
-{
-    //Check is string more than 4096,
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE));
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,write_str,strlen(write_str));
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
-}
-*/
+
 int write_disk(DWORD offset, char* buf)
 {
     //Check is string more than 4096,
@@ -123,34 +111,19 @@ int write_disk(DWORD offset, char* buf)
     //printf("\n Writing : %s at location: %d", write_buffer,offset);
     return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
 }
-
-int write_disk2(DWORD offset, char* buf)
-{
-    //Check is string more than 4096,
-    char *write_str = buf;
-    char *write_buffer = (char*) ((uint64_t)pages_for_ahci_start_virtual+ 6*(VIRT_PAGE_SIZE));
-    //memset((uint64_t *)(write_buffer), 0, VIRT_PAGE_SIZE);
-    memcpy(write_buffer,write_str,strlen(write_str));
-    //memcpy(write_buffer,write_str,4096);
-    uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 6*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
-    //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    return write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
-}
-
-
 int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWORD buf)
 {
     //printf("\n Start Read");
 
     port->is = 0xffff;              // Clear pending interrupt bits
-
     int slot = find_cmdslot(port);
     if (slot == -1)
         return 0;
+
     uint64_t clb_addr = 0;
     clb_addr = (((clb_addr | port->clbu) << 32) | port->clb);
     HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(AHCI_KERN_BASE + clb_addr);
-    // printf("\n clb %x clbu %x", port->clb, port->clbu);
+    //printf("\n clb_addr = %p", clb_addr);
 
     cmdheader += slot;
 
@@ -231,7 +204,6 @@ int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWOR
     return 1;
 }
 
-
 char* read_disk(DWORD offset)
 {
     //Check is string more than 4096,
@@ -284,7 +256,8 @@ int append_disk(char* buf)
 int find_cmdslot(HBA_PORT *port)
 {
     // An empty command slot has its respective bit cleared to ï¿½0ï¿½ in both the PxCI and PxSACT registers.
-    // // If not set in SACT and CI, the slot is free // Checked
+    // If not set in SACT and CI, the slot is free
+	// Checked
     DWORD slots = (port->sact | port->ci);
     int num_of_slots= (abar->cap & 0x0f00)>>8 ; // Bit 8-12
     int i;
@@ -365,8 +338,6 @@ void port_rebase(HBA_PORT *port, int portno){
     stop_cmd(port);
 
     port->clb = (((uint64_t)pages_for_ahci_start & 0xffffffff));
-//    printf("\naddress is clb= %p\n",port->clb);
-
     port->clbu = 0;
     port->fb =  (((uint64_t)pages_for_ahci_start + (uint64_t) ((32<<10)))& 0xffffffff);
     port->fbu =  ((((uint64_t)pages_for_ahci_start + (uint64_t) ((32<<10)))>>32)& 0xffffffff);
@@ -394,8 +365,8 @@ void port_rebase(HBA_PORT *port, int portno){
         cmdheader[i].prdtl = 8; // 8 prdt entries per command table
         // 256 bytes per command table, 64+16+48+16*8
         // Command table offset: 40K + 8K*portno + cmdheader_index*256
-        cmdheader[i].ctba =  (((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))& 0xffffffff);
-        cmdheader[i].ctbau= ((((uint64_t)pages_for_ahci_start + (uint64_t) ((40<<10)) + (uint64_t)((i<<8)))>>32)& 0xffffffff);
+        cmdheader[i].ctba  = (((uint64_t)pages_for_ahci_start + (uint64_t) (( 40 << 10 )) + (uint64_t)(( i << 8 ))) & 0xffffffff);
+        cmdheader[i].ctbau = ((((uint64_t)pages_for_ahci_start + (uint64_t) (( 40 << 10)) + (uint64_t)(( i << 8 ))) >> 32)& 0xffffffff);
 
  		ctb_addr = 0;
         ctb_addr = ((( ctb_addr | cmdheader[i].ctbau ) << 32 ) | cmdheader[i].ctba );
@@ -426,7 +397,7 @@ void probe_port(HBA_MEM *abar_temp)
             int dt = check_type((HBA_PORT *)&abar_temp->ports[i]);
             if (dt == AHCI_DEV_SATA)
             {
-                printf("\nSATA drive found at port %d\n", i);
+     //           printf("\nSATA drive found at port %d\n", i);
                 abar = abar_temp;
 
                 port_rebase(abar_temp->ports, i);
@@ -470,18 +441,43 @@ void init_ahci()
 
     uint32_t paddr = 0xFEBF0000;
 
+//    pages_for_ahci_start_virtual = ahci_alloc_pages(30); // 30 pages allocate -> Write_pages are 5 onwards
 
     void * virtAddr = (void *)sub_malloc(0,1);
     // Performs a virtual to physical mapping such that the virtual address is of the form 0000 0000 xxxx xxxx
     //printf("\n==> Virtual address = %x",virtAddr);
     vmmgr_map_page_after_paging(paddr, (uint64_t) virtAddr, 0);
 
+    //memset(virtAddr, 0, VIRT_PAGE_SIZE);
 
     pages_for_ahci_start_virtual = (uint64_t*) sub_malloc(29 , 1);
     pages_for_ahci_start =(uint64_t*)((uint64_t)pages_for_ahci_start_virtual - (uint64_t)0xFFFFFFFF80000000);  // physical page start -> 32 pages assign
+    //printf("\n==> Virtual for buffer:%x\n Physical for buffer: %x",pages_for_ahci_start_virtual, pages_for_ahci_start);
     abar = (HBA_MEM *)virtAddr;
    //printf("\n Capablity : %p  PI : %p VI : %p Interrupt Status : %p", abar->cap, abar->pi,abar->vs,abar->is);
     probe_port(abar);
+    //printf("Back from probe_port");
+    //char *M = "Mike Ferdman Rocks\0";
+    /*char *C = ">>Chid Rocksi An operating system (OS) is a collection of software that manages computer hardware resources and provides common services for computer programs. The operating system is an essential component of the system software in a computer system. Application programs usually require an operating system to function.\
+Time-sharing operating systems schedule tasks for efficient use of the system and may also include accounting software for cost allocation of processor time, mass storage, printing, and other resources.\
+\
+For hardware functions such as input and output and memory allocation, the operating system acts as an intermediary between programs and the computer hardware,[1][2] although the application code is usually executed directly by the hardware and will frequently make a system call to an OS function or be interrupted by it. Operating systems can be found on almost any device that contains a computer—from cellular phones and video game consoles to supercomputers and web servers. \
+\
+Examples of popular modern operating systems include Android, BSD, iOS, Linux, OS X, QNX, Microsoft Windows,[3] Windows Phone, and IBM z/OS. All these, except Windows, Windows Phone and z/OS, share roots in UNIX.\0";*/
+    //char *O = "CSE 506 Rocks\0";
+    //char *I = "First -Initial \0";
+    //char *N = "Second - Next Value \0";
+
+    //printf("\nREAD DATA: %s",read_disk(0));
+    //write_disk(0,I);
+    //printf("\nREAD DATA: %s",read_disk(0));
+    //append_disk(N);
+    //write_disk(1,M);
+    //write_disk(3,O);
+
+    //printf("\nREAD DATA: %s",read_disk(0));
+    //printf("\nREAD DATA: %s",read_disk(1));
+    //printf("\nREAD DATA: %s",read_disk(3));
 }
 
 

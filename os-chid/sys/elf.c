@@ -95,7 +95,7 @@ void init_tarfs(){
         struct fs_tree* temp_rt = &rootfs;
         struct fs_tree* old_dir = &rootfs;
 
-        strncpy(rootfs.name, "rootfs/", 7);  
+        strncpy(rootfs.name, "rootfs/", 7);
         header = (struct posix_header_ustar*)(&_binary_tarfs_start);
          while( (uint64_t)header <= end ){
           if(strncmp(old_dir->name, (char*)header->name, strlen((char*)old_dir->name)) == 0)
@@ -122,7 +122,7 @@ void init_tarfs(){
             header = (struct posix_header_ustar*)((uint64_t)(header + 1) + (uint64_t)round(my_atool(header->size)));
            }
         return;
- 
+
 }
 int tarfs_open(char* name){
         int i=0;
@@ -132,7 +132,7 @@ int tarfs_open(char* name){
                 fd=i;
                 break;
             }
-        }   
+        }
         if(fd != 0)
           file_used[fd] = 1;
         return fd;
@@ -151,7 +151,7 @@ void* tarfs_read(char* name){
               found = 1;
               start_addr = (void*)(header + 1);
               break;
-           } 
+           }
         if(my_atool(header->size) == 0)
             header = header + 1 + (my_atool(header->size));
         else
@@ -174,7 +174,7 @@ int do_cd(char* name){
   void* addr = tarfs_read(name);
   if(!addr)
     return -1;
-  
+
   pwd = get_pwd(name);
   //printf("pwd %s\n",pwd->name);
   return 0;
@@ -192,7 +192,7 @@ void print_ls_rec(struct fs_tree *crawl){
       //print_ls_rec(crawl->child[i]);
     }
     //print_ls(
-     
+
 }
 
 void print_ls(){
@@ -214,7 +214,7 @@ void print_ll(){
       else
           header = (struct posix_header_ustar*)((uint64_t)(header + 1) + (uint64_t)round(my_atool(header->size)));
     }
-    
+
 }
 /*
 Structure of ELF File.
@@ -240,7 +240,7 @@ uint16_t readelf(char *name, struct exec *executable, uint16_t *pgm_entries, uin
         bin_start = (void*)tarfs_read(name);
         if((uint64_t)bin_start == NULL)
             return 0;
-        
+
         bin_elf_start = (Elf64_Ehdr*)bin_start;
         *entry_point = bin_elf_start->e_entry;
         *pgm_entries = bin_elf_start->e_phnum - 1;
