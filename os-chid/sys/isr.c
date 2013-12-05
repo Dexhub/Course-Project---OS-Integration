@@ -24,7 +24,7 @@ extern int nextFreePid;
 extern char* read_file(int inode,int count,char* buf);
 extern int create_file(char*);
 extern int write_file(char*,int);
-extern void seek(int,int);
+extern void seek_file(int,int);
 extern int tarfs_open(char*);
 extern char files[][100];
 extern int file_used[];
@@ -356,6 +356,6 @@ int do_create(char* name){
 }
 
 int do_seek(int fd, int pos){
-  seek(fd,pos);
+  seek_file(fd,pos);
   return 0;
 }

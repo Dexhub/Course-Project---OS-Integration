@@ -6,7 +6,7 @@ int find_cmdslot(HBA_PORT *port);
 
 HBA_MEM *abar;
 uint64_t *pages_for_ahci_start;
-uint66_t *pages_for_ahci_end;
+uint64_t *pages_for_ahci_end;
 uint64_t *pages_for_ahci_start_virtual;
 uint64_t *pages_for_ahci_end_virtual;
 
@@ -473,7 +473,7 @@ void init_ahci()
 
     void * virtAddr = (void *)sub_malloc(0,1);
     // Performs a virtual to physical mapping such that the virtual address is of the form 0000 0000 xxxx xxxx
-    printf("\n==> Virtual address = %x",virtAddr);
+    //printf("\n==> Virtual address = %x",virtAddr);
     vmmgr_map_page_after_paging(paddr, (uint64_t) virtAddr, 0);
 
 

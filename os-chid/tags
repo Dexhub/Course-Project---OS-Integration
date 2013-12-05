@@ -262,7 +262,6 @@ LIST_POISON1	include/sys/list.h	10;"	d
 LIST_POISON2	include/sys/list.h	11;"	d
 Launch_Thread	sys/kthread.c	/^void Launch_Thread(void)$/;"	f
 MAXARGS	include/sys/shell.h	4;"	d
-MAXLINE	sys/shell.c	6;"	d	file:
 MAX_COLUMNS	include/stdio.h	8;"	d
 MAX_GDT	sys/gdt.c	5;"	d	file:
 MAX_IDT	sys/idt.c	5;"	d	file:
@@ -590,7 +589,8 @@ do_ls	sys/isr.c	/^void do_ls(){$/;"	f
 do_open	sys/isr.c	/^int do_open(char* name){$/;"	f
 do_pwd	sys/isr.c	/^void do_pwd(){$/;"	f
 do_sbrk	sys/isr.c	/^int do_sbrk(int pr){$/;"	f
-doread	sys/isr.c	/^signed int doread(char* buf,int fd){$/;"	f
+do_seek	sys/isr.c	/^int do_seek(int fd, int pos){$/;"	f
+doread	sys/isr.c	/^signed int doread(char* buf,int fd, int cnt){$/;"	f
 e_ehsize	include/elf.h	/^Elf64_Half e_ehsize; \/* ELF header size *\/$/;"	m	struct:__anon4
 e_entry	include/elf.h	/^Elf64_Addr e_entry; \/* Entry point address *\/$/;"	m	struct:__anon4
 e_flags	include/elf.h	/^Elf64_Word e_flags; \/* Processor-specific flags *\/$/;"	m	struct:__anon4
@@ -616,11 +616,9 @@ entry	include/sys/mm/vmmgr_virtual.h	/^  pt_entry entry[PAGES_PER_TABLE];$/;"	m	
 errCode	include/sys/idt.h	/^    uint64_t intNo, errCode;$/;"	m	struct:registers
 error	include/ahci.h	/^    BYTE    error;       \/\/ Error register$/;"	m	struct:tagFIS_REG_D2H
 error	include/ahci.h	/^    BYTE    error;      \/\/ Error register$/;"	m	struct:tagFIS_PIO_SETUP
-eval	bin/shell/shell.c	/^int eval(char *cmdline) $/;"	f
-eval	sys/shell.c	/^void eval(char *cmdline) $/;"	f
+eval	bin/shell/shell.c	/^int eval(char *cmdline)$/;"	f
 exec	bin/shell/shell.c	/^int exec(char* name){$/;"	f
 exec	include/elf.h	/^struct exec{$/;"	s
-exec	sys/shell.c	/^void exec(char* name){$/;"	f
 execve	libc/exec.c	/^int execve(const char* buf){$/;"	f
 exit	crt/crt1.c	/^void exit(res){$/;"	f
 exitCode	include/sys/kthread.h	/^    int exitCode;$/;"	m	struct:Kernel_Thread
@@ -811,7 +809,7 @@ main	bin/hello/hello.c	/^int main(int argc, char* argv[]) {$/;"	f
 main	bin/ls/ls.c	/^int main(){$/;"	f
 main	bin/open/open.c	/^int main(){$/;"	f
 main	bin/ps/ps.c	/^int main(){$/;"	f
-main	bin/shell/shell.c	/^int main(int argc, char* argv[], char* envp[]) $/;"	f
+main	bin/shell/shell.c	/^int main(int argc, char* argv[], char* envp[])$/;"	f
 main	bin/stackoverflow/stackoverflow.c	/^int main(){$/;"	f
 main	bin/testsigsegv/segv.c	/^int main(){$/;"	f
 main	bin/world/world.c	/^int main(int argc, char *argv[]){$/;"	f
@@ -915,8 +913,7 @@ pages_for_ahci_end_virtual	sys/ahci.c	/^uint64_t *pages_for_ahci_end_virtual;$/;
 pages_for_ahci_start	sys/ahci.c	/^uint64_t *pages_for_ahci_start;$/;"	v
 pages_for_ahci_start_virtual	sys/ahci.c	/^uint64_t *pages_for_ahci_start_virtual;$/;"	v
 parent	include/sys/kthread.h	/^    struct Kernel_Thread* parent;$/;"	m	struct:Kernel_Thread	typeref:struct:Kernel_Thread::Kernel_Thread
-parseline	bin/shell/shell.c	/^int parseline(const char *cmdline, struct cmdline_tokens *tok) $/;"	f
-parseline	sys/shell.c	/^int parseline(const char *cmdline, struct cmdline_tokens *tok) $/;"	f
+parseline	bin/shell/shell.c	/^int parseline(const char *cmdline, struct cmdline_tokens *tok)$/;"	f
 pcr3	include/sys/kthread.h	/^    uint64_t pcr3;$/;"	m	struct:Kernel_Thread
 pd_entry	include/sys/mm/vmmgr_pde.h	/^typedef uint64_t pd_entry;$/;"	t
 pd_entry_add_attrib	sys/mm/vmmgr_pde.c	/^inline void pd_entry_add_attrib(pd_entry *e, uint64_t attrib){$/;"	f
@@ -963,6 +960,7 @@ pmport	include/ahci.h	/^    BYTE    pmport:4;   \/\/ Port multiplier$/;"	m	struc
 popq	sys/task_switch.s	/^popq %rax$/;"	l
 port_rebase	sys/ahci.c	/^void port_rebase(HBA_PORT *port, int portno){$/;"	f
 ports	include/ahci.h	/^    HBA_PORT    ports[1];   \/\/ 1 ~ 32$/;"	m	struct:tagHBA_MEM
+position	include/fs.h	/^  uint32_t position;$/;"	m	struct:inodes
 posix_header_ustar	include/sys/tarfs.h	/^struct posix_header_ustar {$/;"	s
 prdbc	include/ahci.h	/^        DWORD   prdbc;      \/\/ Physical region descriptor byte count transferred$/;"	m	struct:tagHBA_CMD_HEADER
 prdt_entry	include/ahci.h	/^    HBA_PRDT_ENTRY  prdt_entry[1];  \/\/ Physical region descriptor table entries, 0 ~ 65535$/;"	m	struct:tagHBA_CMD_TBL
@@ -1023,9 +1021,9 @@ rbx	include/sys/idt.h	/^    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, 
 rcx	include/sys/idt.h	/^    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, rdi, rbp, rdx, rcx, rbx, rax;$/;"	m	struct:registers
 rdi	include/sys/idt.h	/^    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, rdi, rbp, rdx, rcx, rbx, rax;$/;"	m	struct:registers
 rdx	include/sys/idt.h	/^    uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, rdi, rbp, rdx, rcx, rbx, rax;$/;"	m	struct:registers
-read	libc/read.c	/^int read(char* buf,int fd){$/;"	f
+read	libc/read.c	/^int read(char* buf,int fd, int count){$/;"	f
 read_disk	sys/ahci.c	/^char* read_disk(DWORD offset)$/;"	f
-read_file	sys/fs.c	/^char* read_file(int inode){$/;"	f
+read_file	sys/fs.c	/^char* read_file(int inode,int count,char* buf){$/;"	f
 read_file_by_name	sys/fs.c	/^char* read_file_by_name(char *name){$/;"	f
 read_interface	sys/ahci.c	/^int read_interface(HBA_PORT *port, DWORD startl, DWORD starth, DWORD count, QWORD buf)$/;"	f
 readelf	sys/elf.c	/^uint16_t readelf(char *name, struct exec *executable, uint16_t *pgm_entries, uint64_t *entry_point){$/;"	f
@@ -1100,6 +1098,8 @@ sd_xx3	sys/gdt.c	/^	uint64_t sd_xx3:19;    \/* reserved *\/$/;"	m	struct:sys_seg
 sd_zero	sys/gdt.c	/^	uint64_t sd_zero:5;    \/* must be zero *\/$/;"	m	struct:sys_segment_descriptor	file:
 seconds_tens	sys/timer.c	/^uint16_t seconds_tens=0;$/;"	v
 seconds_units	sys/timer.c	/^uint16_t seconds_units=0;$/;"	v
+seek	libc/seek.c	/^int seek(int fd,int pos){$/;"	f
+seek	sys/fs.c	/^void seek(int inode,int position)$/;"	f
 seg_actual_start	include/elf.h	/^uint64_t seg_actual_start;$/;"	m	struct:exec
 seg_length	include/elf.h	/^uint32_t seg_length;$/;"	m	struct:exec
 seg_mem	include/elf.h	/^void* seg_mem;$/;"	m	struct:exec
@@ -1127,7 +1127,6 @@ sh_name	include/elf.h	/^Elf64_Word sh_name; \/* Section name *\/$/;"	m	struct:__
 sh_offset	include/elf.h	/^Elf64_Off sh_offset; \/* Offset in file *\/$/;"	m	struct:__anon5
 sh_size	include/elf.h	/^Elf64_Xword sh_size; \/* Size of section *\/$/;"	m	struct:__anon5
 sh_type	include/elf.h	/^Elf64_Word sh_type; \/* Section type *\/$/;"	m	struct:__anon5
-shell_main	sys/shell.c	/^void shell_main() $/;"	f
 sig	include/ahci.h	/^    DWORD   sig;        \/\/ 0x24, signature$/;"	m	struct:tagHBA_PORT
 size	include/fs.h	/^  uint32_t size;$/;"	m	struct:inodes
 size	include/sys/idt.h	/^    uint16_t size;$/;"	m	struct:idtr_t
@@ -1235,7 +1234,6 @@ update_structures	sys/fs.c	/^void update_structures(){$/;"	f
 usable_mem_counter	sys/mm/mmgr.c	/^uint64_t usable_mem_counter = 0;$/;"	v
 usage	bin/shell/shell.c	/^void usage(){$/;"	f
 usage	include/fs.h	/^  bool usage;$/;"	m	struct:inodes
-usage	sys/shell.c	/^void usage(){$/;"	f
 va_arg	include/stdarg.h	2;"	d
 va_copy	include/stdarg.h	4;"	d
 va_end	include/stdarg.h	3;"	d

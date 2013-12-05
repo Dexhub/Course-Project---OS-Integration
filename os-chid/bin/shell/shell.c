@@ -6,7 +6,7 @@
 volatile char a[] = "abcsdef\n";
 char prompt[] = "SBUINX> ";
 
-int parseline(const char *cmdline, struct cmdline_tokens *tok) 
+int parseline(const char *cmdline, struct cmdline_tokens *tok)
 {
 
     char array[100];          /* holds local copy of command line */
@@ -32,13 +32,6 @@ int parseline(const char *cmdline, struct cmdline_tokens *tok)
         tok->argv[tok->argc++] = buf;
             /* Detect quoted tokens */
 
-        if (!strcmp(tok->argv[0], "quit")) {                 /* quit command */
-            tok->builtins = BUILTIN_QUIT;
-        } else if (!strcmp(tok->argv[0], "jobs")) {          /* jobs command */
-            tok->builtins = BUILTIN_JOBS;
-        } else {
-            tok->builtins = BUILTIN_NONE;
-        }
         buf = buf + 1 + next_str_ind;
     }
     return 0;
@@ -96,7 +89,7 @@ int eval(char *cmdline)
 //          printf("calling exec\n");
           //if(strcmp(tok.argv[1], "~") == 0)
               //ret = cd("~");
-          //else 
+          //else
               ret = cd(tok.argv[1]);
      //     break;
       }
@@ -116,9 +109,9 @@ int eval(char *cmdline)
 }
 
 /*
- * main - The shell's main routine 
+ * main - The shell's main routine
  */
-int main(int argc, char* argv[], char* envp[]) 
+int main(int argc, char* argv[], char* envp[])
 {
     char cmdline[100];    /* cmdline for fgets */
     int emit_prompt = 1; /* emit prompt (default) */
@@ -136,8 +129,8 @@ int main(int argc, char* argv[], char* envp[])
 //        printf("read %s from the terminal\n",cmdline);
         /* Remove the trailing newline */
         cmdline[strlen(cmdline)-1] = '\0';
-        
-      // Forking a new Child to execute the command 
+
+      // Forking a new Child to execute the command
        pid = fork();
         if(pid > 0){
           // In the child which is the actual worker
@@ -151,7 +144,7 @@ int main(int argc, char* argv[], char* envp[])
           wait();
           //printf("\nProcess %s exited normally pid = %d\n\n",cmdline,getpid());
         }
-    } 
-   
-  return 0; 
+    }
+
+  return 0;
 }

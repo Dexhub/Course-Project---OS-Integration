@@ -256,7 +256,7 @@ int get_file_descriptor(char *name){
   return find_file(name);
 }
 
-void seek(int inode,int position)
+void seek_file(int inode,int position)
 {
   position = (position + inode_list[inode].position ) % inode_list[inode].size;
   inode_list[inode].position = position;
