@@ -204,7 +204,7 @@ int strlen_disk(char* buf){
 }
 
 
-int append_disk(char* buf)
+int append_disk(char* buf, int offset)
 {
     //Check is string more than 4096,
     //forst perform a read, then add this line in the buffer, and then perform a write.
@@ -220,7 +220,7 @@ int append_disk(char* buf)
     memcpy(write_buffer,buf,strlen(buf));
     uint64_t write_buffer_physical =(uint64_t)(((uint64_t)pages_for_ahci_start_virtual+ 5*(VIRT_PAGE_SIZE) - (uint64_t)0xFFFFFFFF80000000));
     //printf("\n Writing : %s at location: %d", write_buffer,offset);
-    write_interface(&abar->ports[0], 0, 0, 1, write_buffer_physical);
+    write_interface(&abar->ports[0], offset, 0, 1, write_buffer_physical);
     return 1;
 }
 //    //Check is string more than 4096,
@@ -426,7 +426,7 @@ void init_ahci(){
   //printf("\nREAD DATA: %s",read_disk(0));
   //write_disk(0,I);
   //printf("\nREAD DATA: %s",read_disk(0));
-  //append_disk(N);
+  //append_disk(N,0);
   //write_disk(1,M);
   //write_disk(3,O);
 

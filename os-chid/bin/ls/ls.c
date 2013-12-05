@@ -3,7 +3,7 @@
 
 
 int main(){
-    printf("hi\n");
+   printf("-------Tarfs Contents:-----\n");
    ls();
   return 0;
 }

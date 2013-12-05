@@ -21,10 +21,9 @@ previous sectors
                              // Static Smart Hack - smart is relative lol
 extern char* read_disk(int);
 extern char* write_disk(int,char*);
-extern char* write_disk2(int,char*);
 extern uint64_t file_mmgr_memory_map[];
 extern char* read_disk(int);
-extern int append_disk(char* buf);
+extern int append_disk(char*,int);
 
 // --- Helper functions-----
 int inflate(int fd) //increase the file descriptor number by the inflate constant
