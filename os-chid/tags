@@ -1289,9 +1289,9 @@ vs	include/ahci.h	/^    DWORD   vs;     \/\/ 0x10, Version$/;"	m	struct:tagHBA_M
 w	include/ahci.h	/^    BYTE    w:1;        \/\/ Write, 1: H2D, 0: D2H$/;"	m	struct:tagHBA_CMD_HEADER
 wait	libc/wait.c	/^int wait(){$/;"	f
 wait	sys/isr.c	/^void wait(){$/;"	f
-write	libc/printf.c	/^uint16_t write(const char* buf){$/;"	f
+write	libc/printf.c	/^uint16_t write(const char* buf, int fd){$/;"	f
 write	libc/syscalls.s	/^write:$/;"	l
-write	sys/isr.c	/^void write(const char* str){$/;"	f
+write	sys/isr.c	/^void write(const char* str, int fd){$/;"	f
 write_char	sys/stdfns.c	/^void write_char(int color, char c)$/;"	f
 write_disk	sys/ahci.c	/^int write_disk(DWORD offset, char* buf)$/;"	f
 write_disk2	sys/ahci.c	/^int write_disk2(DWORD offset, char* buf)$/;"	f

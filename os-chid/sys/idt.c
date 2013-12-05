@@ -82,7 +82,7 @@ int fault_handler(regs *r)
                                   break;
                           case 5: // Read
                                   val = -1;
-                                  val = doread((char*)r->rdi, (int)r->rsi);
+                                  val = doread((char*)r->rdi, (int)r->rsi, (int)r->rdx);
                                   //printf("returning %d to %d",val,currentThread->pid);
                                   break;
                           case 6: wait();
@@ -116,6 +116,9 @@ int fault_handler(regs *r)
                                   break;
                           case 23: val = -1;
                                    val = do_create((char*)r->rdi);
+                                   break;
+                          case 24: val = -1;
+                                   val = do_seek((int)r->rdi, (int)r->rsi);
                                    break;
                         }
                         break;

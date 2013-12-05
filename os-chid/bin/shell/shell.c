@@ -6,7 +6,7 @@
 volatile char a[] = "abcsdef\n";
 char prompt[] = "SBUINX> ";
 
-int parseline(const char *cmdline, struct cmdline_tokens *tok) 
+int parseline(const char *cmdline, struct cmdline_tokens *tok)
 {
 
     char array[100];          /* holds local copy of command line */
@@ -59,7 +59,7 @@ int exec(char* name){
 }
 
 
-int eval(char *cmdline) 
+int eval(char *cmdline)
 {
     struct cmdline_tokens tok;
     int j,ret=0;
@@ -107,9 +107,9 @@ int eval(char *cmdline)
 }
 
 /*
- * main - The shell's main routine 
+ * main - The shell's main routine
  */
-int main(int argc, char* argv[], char* envp[]) 
+int main(int argc, char* argv[], char* envp[])
 {
     char cmdline[100];    /* cmdline for fgets */
     int emit_prompt = 1; /* emit prompt (default) */
@@ -123,12 +123,12 @@ int main(int argc, char* argv[], char* envp[])
         if (emit_prompt) {
             printf("%s", prompt);
         }
-        read(cmdline, STDIN);
+        read(cmdline, STDIN, -1);
 //        printf("read %s from the terminal\n",cmdline);
         /* Remove the trailing newline */
         cmdline[strlen(cmdline)-1] = '\0';
-        
-      // Forking a new Child to execute the command 
+
+      // Forking a new Child to execute the command
        pid = fork();
         if(pid > 0){
           // In the child which is the actual worker
@@ -142,7 +142,7 @@ int main(int argc, char* argv[], char* envp[])
           wait();
           //printf("\nProcess %s exited normally pid = %d\n\n",cmdline,getpid());
         }
-    } 
-   
-  return 0; 
+    }
+
+  return 0;
 }

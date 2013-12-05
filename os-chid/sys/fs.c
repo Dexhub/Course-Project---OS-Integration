@@ -255,6 +255,43 @@ int make_directory(char *name){
 int get_file_descriptor(char *name){
   return find_file(name);
 }
+
+void seek(int inode,int position)
+{
+  position = (position + inode_list[inode].position ) % inode_list[inode].size;
+  inode_list[inode].position = position;
+  return;
+}
+
+char* read_file(int inode,int count,char* buf){
+  if(inode == -1)
+    {
+      printf(" = No file found");
+      return NULL;
+    }
+  else
+    {
+      printf(" = File found!");
+//      printf("\n   File name: %s size: %d start_block %d",inode_list[inode].name,inode_list[inode].size,inode_list[inode].start_block);
+      char *contents = read_disk(inode_list[inode].start_block);
+      int position = inode_list[inode].position;
+
+      while(position != 0)
+      {
+        contents++;
+        position--;
+      }
+      const char *s='\0';
+      //printf("\n Size of buffer:%d",sizeof(buf));
+      memcpy(buf,(const char *)&s,sizeof(buf));
+      memcpy(buf,contents,count);
+      //update cursor position in the file and make sure it is within the file size range
+      position = (position + count) % inode_list[inode].size;
+      inode_list[inode].position = position;
+      return buf;
+    }
+}
+/*
 char* read_file(int inode){
   inode = deflate(inode);
   if(inode == -1)
@@ -275,11 +312,13 @@ char* read_file(int inode){
   //char *contents = read_disk(fd);
       return contents;
     }
-}
+}*/
 char* read_file_by_name(char *name){
 
+  int count = 100;
+  char buf[100];
   int fd = get_file_descriptor(name);
-  char *c = read_file(fd);
+  char *c = read_file(fd,count,buf);
   //printf("\n FD:%d",fd);
   if (c!= NULL)
     {

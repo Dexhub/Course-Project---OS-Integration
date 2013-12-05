@@ -12,7 +12,7 @@ int sys_getpid();
 void sys_exit();
 int fork(regs*);
 void sleep(uint64_t time);
-int doread(char*, int);
+int doread(char*, int, int);
 void wait();
 int do_execve();
 void print_process();
@@ -24,4 +24,5 @@ int do_close(int);
 int changed(char*);
 void do_pwd();
 int do_create(char*);
+int do_seek(int, int);
 #endif
