@@ -105,4 +105,5 @@ Features remaining to be implemented
 scanf  - There is only a read function
 ulimit  
 Background job 
-Shell scripting 
+Shell scripting
+Ultimit -s - We have added the limit for the maximum number of pages a stack can grow. But we have not added a system call to dynamically set the value. By default we have set the value as 4. So if the stack grows more than 4 pages we will kill the process.
