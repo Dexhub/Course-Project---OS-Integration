@@ -1,0 +1,108 @@
+﻿+++++++
+
+SBUNIX COURSE PROJECT
+
++++++++
+
+Project Members:
+Chidambaram Ramanathan (cramanathan@cs.stonybrook.edu , 109079125)
+Himanshu Shah ( hkshah@cs.stonybrook.edu, 109324380 )
+
+Project Attempted:
+70 Points
+
+Important Features Implemented
+==============================
+==============================
+Co-operative multi-tasking ( Function name: Yield , defined in sys/kthread.c )
+Pre-emptive multi-tasking ( Function name: irq_common_stub, defined in sys/irq.c )
+File disk read/write ( Function name: read_disk, write_disk, defined in 
+Tarfs tree structure ( Function name: init_tarfs, defined in sys/elf.c ) 
+Auto growing stack ( Function name: page_fault_handler, defined in sys/isr.c )
+Copy on Write Fork ( Function name: page_fault_handler, defined in sys/isr.c )
+SIGSEGV handling ( Function name: page_fault_handler, defined in sys/isr.c )
+Sleep ( Function name: sleep, defined in sys/isr.c )
+Read / Write ( Function name: doread, write, defined in sys/isr.c )
+
+File Systems Related
+====================
+create file ( Function name: create_file, defined in sys/fs.c)
+write ( Function name: write_file, defined in sys/fs.c)
+create directory ( Function name: make_directory defined in sys/fs.c)
+list files (Function name: ls_fs defined in sys/fs.c)
+seek ( Function name: seek, defined in sys/fs.c)
+find files ( Function name: find_file, defined in sys/fs.c)
+find directory (Function name:find_directory, defined in sys/fs.c)
+append data at a given (Function name: append_disk, defined in sys/fs.c)
+
+Important System calls Implemented
+==================================
+==================================
+
+Fork ( Function name: Fork, defined in sys/fork.c )
+exec ( Function name: do_exec, defined in sys/exec.c )
+cd ( Function name: do_cd, defined in sys.elf.c )
+ls ( Function name: print_ls, defined in sys/elf.c )
+exit ( Function name: sys_exit, defined in sys.isr.c )
+getpid ( Function name: sys_getpid, defined in sys/isr.c )
+wait ( Function name: wait, defined in sys/isr.c )
+ps ( Function name: print_process, defined in sys/isr.c )
+sbrk ( Function name: do_sbrk, defined in sys/isr.c )
+open / close ( Function name: do_open, do_close, defined in sys/isr.c )
+pwd ( Function name: do_pwd, defined in sys/isr.c )
+File Descriptors
+ STDIN, STDOUT - Reads from / Writes to stdin, stdout 
+ FD's - If a file descriptor is specified, reads from writes to that file
+
+File Systems Related
+====================
+create
+read
+seek
+write
+
+Binaries attached for the purpose of testing ( Found under bin directory )
+==========================================================================
+==========================================================================
+
+sleep - Puts the process to sleep for 10 seconds
+memalloc - Tests the user space malloc
+forkexec - Tests the fork and exec
+stackoverflow - Tests the stack over flow situation ( auto growing stack )
+testsigsegv - Kills the faulting process
+
+File systems related: bin/open
+=====================
+1 run "ls" will show no contents on the disk.
+2 run "exec bin/open"
+ - Creates a file named "New file.txt" with data "123456789"in it.
+ - Reads one character from the file and performs seek by one character.
+ - Expected output: All odd characters.
+ - It will display the contents of the specified file in the tarfs file system
+3 run "ls" again to verify the disk contents.
+4 run "exec bin/open" again, it will say that the file exists.
+
+
+Known Bugs:   **** IMPORTANT ****
+===========
+
+Bug description:    At random times, the shell denies requests for the user. Example,
+----------------    exec bin/sleep works most of the times, at certain places we get Bad File name error.
+		    i.e There is a bug in shell's implementation and not the underlying concept.
+
+Methods to recover: If there is some feature absolutely needs to be tested once this bug surfaces, please reboot the system and then give
+                    give exec bin/filename. Alternaively you can replace exec("bin/shell") in sys/main.c to 
+                    exec("bin/filename") to directly  
+
+Bug description:    A random key press of enter causes a reboot. Found in last minute. Unable to fix
+
+Bug description:    Does not adhere to C99 standard compilation
+
+Bug description:    BackSpace not working
+
+Features remaining to be implemented
+------------------------------------
+scanf  - There is only a read function
+ulimit  
+Background job 
+Shell scripting 
